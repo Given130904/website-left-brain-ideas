@@ -1,0 +1,364 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "portfolio": "Portfolio",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "testimonials": "Testimonials",
+    "startProject": "Start Project"
+  },
+  "hero": {
+    "headline1": "Build Premium Websites",
+    "headline2": "For Modern Businesses.",
+    "sub": "We help SMEs, Startups, Personal Brands, and Enterprises build modern websites that are fast, secure, and professional.",
+    "cta_primary": "Free Consultation",
+    "cta_secondary": "View Portfolio",
+    "benefit1_title": "Free Consultation",
+    "benefit1_desc": "Confused where to start? Tell us your needs, we are ready to help choose the right solution.",
+    "benefit2_title": "Friendly Pricing",
+    "benefit2_desc": "Suitable for SMEs, new businesses, and personal branding at affordable prices.",
+    "benefit3_title": "Professional Design",
+    "benefit3_desc": "Modern, neat websites, trusted by customers, crafted by an experienced team.",
+    "benefit4_title": "Supported Until Online",
+    "benefit4_desc": "We help from planning until the website is ready to use and accessible to customers."
+  },
+  "about": {
+    "badge": "Who We Are",
+    "heading1": "Where Logic",
+    "heading2": "Meets Creativity",
+    "left_brain_title": "The Left Brain",
+    "left_brain_text": "Represents logic, structured systems, strict backend engineering, performance optimizations, and parameter-hardening security protocols.",
+    "ideas_title": "The Ideas Core",
+    "ideas_text": "Represents user experience innovation, sleek visual identities, glassmorphism layouts, custom fluid elements, and rich responsive aesthetics.",
+    "synergy_title": "Synthesized Synergy",
+    "synergy_text": "Together, they create production-grade web systems that compile seamlessly, load instantly, and establish trust at first glance."
+  },
+  "philosophy": {
+    "badge": "Our Philosophy",
+    "heading1": "The Philosophy Behind",
+    "heading2": "Left Brain Ideas",
+    "description": "Left Brain Ideas is built on the conviction that the best websites are not built on solid logic or beautiful aesthetics alone, but on a harmonious combination of both. We synthesize strict system engineering precision with stunning visual beauty to help your business scale.",
+    "cards": {
+      "structured": {
+        "title": "Structured Thinking",
+        "desc": "Every page and feature is logically mapped out using concrete data and smooth user journeys, making your website simple to understand."
+      },
+      "intuitive": {
+        "title": "Intuitive Design",
+        "desc": "Sleek, elegant, and modern interfaces. We ensure every visual detail feels comfortable to browse, keeping your visitors deeply engaged."
+      },
+      "support": {
+        "title": "Assistance Until Online",
+        "desc": "We guide you through domain setup, server configuration, and website management so your online launch is completely stress-free."
+      }
+    }
+  },
+  "services": {
+    "badge": "What We Do",
+    "heading": "Our Digital Solutions",
+    "featured_label": "Featured Service",
+    "discuss": "Discuss Project",
+    "engineering": "Engineering",
+    "design": "Design",
+    "items": {
+      "custom_app": {
+        "title": "Custom Web Application",
+        "desc": "Complex platforms tailored to your business logic — secure databases, custom APIs, admin systems, and real-time interfaces built to scale."
+      },
+      "web_dev": {
+        "title": "Website Development",
+        "desc": "High-performance platforms engineered with Next.js, React, and TypeScript. Sub-second load times, built to rank."
+      },
+      "landing": {
+        "title": "Landing Page",
+        "desc": "Conversion-focused pages with premium motion, interactive spotlights, and copy frameworks that turn visitors into leads."
+      },
+      "company": {
+        "title": "Company Profile",
+        "desc": "Enterprise showcases presenting authority, capabilities, and brand voice with clean, credible aesthetics."
+      },
+      "dashboard": {
+        "title": "Dashboard System",
+        "desc": "Real-time metric panels, SVG charts, and admin interfaces at 60 FPS — optimized with smart state management."
+      },
+      "uiux": {
+        "title": "UI / UX Design",
+        "desc": "Design systems, responsive grids, interactive Figma wireframes, and motion guidelines built for development handoff."
+      },
+      "maintenance": {
+        "title": "Website Maintenance",
+        "desc": "Proactive security audits, firewall monitoring, dependency updates, and uptime guarantees — so you never lose sleep."
+      },
+      "responsive": {
+        "title": "Responsive Optimization",
+        "desc": "Layout restructuring, fluid grid assets, and seamless touch controls ensuring pixel-perfect rendering on every device."
+      }
+    }
+  },
+  "portfolio": {
+    "badge": "Selected Work",
+    "heading": "Recent Projects",
+    "sub": "A selection of digital products we have designed and engineered.",
+    "cta": "View Case Study",
+    "cta_live": "Live Demo",
+    "login_required": "Login Required",
+    "filters": {
+      "all": "All",
+      "company_profile": "Company Profile",
+      "dashboard": "Dashboard",
+      "ecommerce": "E-Commerce",
+      "travel": "Travel",
+      "management_system": "Management System"
+    },
+    "projects": {
+      "kala_creative": {
+        "name": "Kala Creative",
+        "category": "Company Profile",
+        "desc": "A high-end creative agency portfolio showcasing visual design, photography, and digital marketing services."
+      },
+      "brains_idea_store": {
+        "name": "Brains Idea Store",
+        "category": "E-Commerce Website",
+        "desc": "A digital storefront and e-commerce platform offering digital products and creative assets with automated instant delivery."
+      },
+      "tedomise": {
+        "name": "Tedomise",
+        "category": "Company Profile",
+        "desc": "Official company profile for Tedomise, a technology consultancy specializing in IT solutions and software engineering."
+      },
+      "sistem_stok_kkp": {
+        "name": "Sistem Stok KKP",
+        "category": "Dashboard System",
+        "desc": "An enterprise-grade stock monitoring and inventory tracking system featuring real-time data visualizers and advanced analytics."
+      },
+      "kalatrip": {
+        "name": "KalaTrip",
+        "category": "Travel Website",
+        "desc": "A modern travel landing page and tour booking hub with dynamic package explorers and rich travel itineraries."
+      },
+      "nike_dashboard": {
+        "name": "Nike Dashboard",
+        "category": "Dashboard UI",
+        "desc": "A high-fidelity dashboard user interface demonstrating e-commerce sales performance, sneaker catalog stats, and user growth."
+      },
+      "jurnal_sdm": {
+        "name": "Jurnal SDM",
+        "category": "Human Resource System",
+        "desc": "A secure human resources management system designed to track employee attendance, payroll analytics, and evaluations."
+      },
+      "gudangin_stok": {
+        "name": "Gudangin Stok",
+        "category": "Inventory Management",
+        "desc": "An inventory management tool for warehouses to monitor stock incoming, outgoing, and low-quantity alerts in real-time."
+      }
+    }
+  },
+  "techstack": {
+    "badge": "Tech Stack",
+    "heading": "Technologies We Use"
+  },
+  "feedback": {
+    "title": "What Do You Think?",
+    "subtitle": "Your feedback helps us continuously improve our service quality.",
+    "success": "Thank you for your rating ❤️",
+    "rating_summary": "Rating: {{rating}} / 10 · Left Brain Ideas"
+  },
+  "why": {
+    "badge": "Why It Works",
+    "heading1": "More Than Just",
+    "heading2": "Beautiful Websites",
+    "sub": "Every pixel has purpose. Every line of code has intent. We build digital products engineered for real-world performance, security, and growth.",
+    "cards": {
+      "performance": {
+        "title": "Fast Performance",
+        "desc": "Every millisecond matters. We engineer with Lighthouse 100 targets, edge CDN delivery, and zero-bloat code architecture that loads before your users blink.",
+        "tags": ["< 1.2s Load", "Edge CDN", "LCP Optimized"]
+      },
+      "security": {
+        "title": "Security First",
+        "desc": "AES-256 encryption, parameterized queries, strict CORS policies, and live threat monitoring baked into every product we ship.",
+        "tags": ["AES-256", "CORS Shield", "Zero Injection"]
+      },
+      "ux": {
+        "title": "Modern User Experience",
+        "desc": "Interfaces that feel alive. Precision micro-animations, pixel-perfect typography, and intuitive navigation engineered to maximize user engagement.",
+        "tags": ["60fps Smooth", "WCAG AA", "Mobile-First"]
+      },
+      "scalable": {
+        "title": "Scalable Architecture",
+        "desc": "Built to grow with your business. Clean component systems, modular APIs, and cloud-native deployment pipelines ensure your platform handles 10 users or 10 million.",
+        "tags": ["Cloud Native", "Modular API", "Auto-Scale"]
+      }
+    }
+  },
+  "process": {
+    "badge": "How We Work",
+    "heading": "Our Development Process",
+    "sub": "We work in systematic phases to guarantee structural code security and UI aesthetic elegance.",
+    "steps": {
+      "step1": {
+        "title": "Consultation",
+        "desc": "We listen to your business vision, discuss technical requirements, and map out the ideal digital strategy for free."
+      },
+      "step2": {
+        "title": "Design",
+        "desc": "Designing a modern, elegant, and user-friendly visual layout that matches your brand identity and captivates your audience."
+      },
+      "step3": {
+        "title": "Website Development",
+        "desc": "Translating designs into real code. We ensure lightning-fast loading speeds, robust responsiveness, and perfect mobile views."
+      },
+      "step4": {
+        "title": "Security & Testing",
+        "desc": "Running comprehensive audits across multiple devices and browsers, while integrating strict security shields to prevent vulnerabilities."
+      },
+      "step5": {
+        "title": "Launching & Assistance",
+        "desc": "Your website goes officially live. We stay by your side to assist with domains, hosting setups, and continuous maintenance."
+      }
+    }
+  },
+  "security": {
+    "badge": "Your Business Security",
+    "heading": "Secure and Worry-Free Websites",
+    "sub": "We ensure your website is fully protected with modern security standards. No need to worry about technical issues, data leaks, or server downtime. Focus on growing your business while we keep your digital storefront safe.",
+    "checklist": {
+      "code": "Neat code structure (Makes the website easy to maintain & bug-free)",
+      "speed": "Fast loading speed (Keeps visitors engaged & reduces bounce rates)",
+      "data": "Data protection shield (Keeps customer info & business data fully locked)",
+      "scale": "Scalable framework (Ready for new features as your business expands)",
+      "longterm": "Long-term readiness (Built with modern tech that stays relevant for years)"
+    },
+    "run_btn": "Run Security Scan",
+    "running_btn": "Scanning storefront...",
+    "status": "SCAN COMPLETED: SITE IS 100% SECURE & OPTIMIZED"
+  },
+  "testimonials": {
+    "badge": "Client Reviews",
+    "heading": "What They Say",
+    "left": [
+      {
+        "name": "Sarah Pratiwi",
+        "company": "Hijab Store Owner",
+        "review": "At first, I was confused about where to start online. Luckily, the consultation was free and the admin explained everything from scratch. Once the website was ready, it was so beautiful, and shopping on mobile runs super fast."
+      },
+      {
+        "name": "Budi Santoso",
+        "company": "CV Karya Mandiri Owner",
+        "review": "Communicating with the Left Brain Ideas team is extremely easy. Every revision was addressed quickly. The resulting company profile exceeded our expectations and looks very professional to our clients."
+      },
+      {
+        "name": "Elena Kusuma",
+        "company": "Klinik Pratama Manager",
+        "review": "As a beginner in the digital space, I was afraid of managing a website. But they taught me step-by-step. The price is also very affordable for our small clinic, and patients trust us much more now."
+      },
+      {
+        "name": "Dedi Hermawan",
+        "company": "Kuliner Nusantara Owner",
+        "review": "I love their super fast response when we faced minor issues at the start. The team was extremely helpful. Now our restaurant looks far more credible to our customers."
+      }
+    ],
+    "right": [
+      {
+        "name": "Sophia Siregar",
+        "company": "Harapan School PR",
+        "review": "Our foundation's website is very neat and loads fast when accessed by parents. The revision process went extremely smooth without any misunderstandings. Excellent service."
+      },
+      {
+        "name": "Hendra Wijaya",
+        "company": "PT Logistik Maju",
+        "review": "Making our first website here was very helpful since the team explained things in non-technical terms. Communication was easy via WhatsApp."
+      },
+      {
+        "name": "Clara Anindita",
+        "company": "Fashion Label Founder",
+        "review": "The design has a premium vibe, different from generic templates. This is very important for my fashion brand to look classy. Fast and communicative."
+      },
+      {
+        "name": "Joko Prasetyo",
+        "company": "Agribisnis Prima Owner",
+        "review": "Great service, affordable pricing, and the website quality is top-notch. It really helps our agribusiness look modern and trusted by buyers outside our city."
+      }
+    ]
+  },
+  "faq": {
+    "badge": "Got Questions?",
+    "heading1": "Frequently Asked",
+    "heading2": "Questions",
+    "sub": "Everything you need to know before we start building together.",
+    "ask_link": "Just ask us directly.",
+    "still_q": "Still have questions?",
+    "send_link": "Send us a message →",
+    "items": {
+      "timeline": {
+        "q": "How long does development take?",
+        "a": "Project timelines vary based on scope and complexity. A standard landing page or branding project typically takes 1-2 weeks. A full custom website or web application ranges from 3-8 weeks."
+      },
+      "revisions": {
+        "q": "Can I request revisions?",
+        "a": "Absolutely. We include structured revision rounds in every project package. You'll have the opportunity to review and provide feedback at each major milestone -- design mockup, development preview, and final delivery."
+      },
+      "hosting": {
+        "q": "Do you provide hosting?",
+        "a": "Yes. We can set up and manage hosting on enterprise-grade platforms including Vercel, AWS, DigitalOcean, or a custom VPS depending on your performance and budget requirements."
+      },
+      "redesign": {
+        "q": "Can you redesign an existing website?",
+        "a": "We specialize in digital transformations. Whether you have an outdated design, poor performance scores, or weak conversion rates -- we can audit your existing platform and deliver a complete rebuild or targeted redesign."
+      },
+      "maintenance": {
+        "q": "Do you provide maintenance?",
+        "a": "Yes. We offer flexible monthly maintenance plans that include security patches, dependency updates, performance monitoring, content changes, and priority bug fixes."
+      }
+    }
+  },
+  "contact": {
+    "badge": "Get In Touch",
+    "heading1": "Let's Build Something",
+    "heading2": "Amazing Together",
+    "sub": "Ready to build a premium web app, high-frequency dashboard, or edge company profile? Tell us your requirements and our engineers will calculate a custom project blueprint.",
+    "wa_label": "WhatsApp Contact",
+    "email_label": "Email Inquiry",
+    "ig_label": "Instagram Channel",
+    "hours_label": "Business Hours",
+    "hours_value": "Monday–Saturday · 09:00–21:00 WIB",
+    "form_name": "Full Name",
+    "form_email": "Email Address",
+    "form_message": "Project Brief Details",
+    "form_placeholder_name": "e.g. Linus Torvalds",
+    "form_placeholder_email": "e.g. linus@kernel.org",
+    "form_placeholder_message": "Describe your project, scale expectations and target goals...",
+    "submit": "Send Message",
+    "submitting": "Sending...",
+    "success_title": "Message Sent!",
+    "success_sub": "We received your message and will get back to you within 24 hours.",
+    "send_another": "Send Another Message",
+    "response_label": "Fast Response",
+    "response_value": "Average < 10 minutes",
+    "cta_main": "Start Free Consultation Now",
+    "cta_sub": "No registration needed · Instantly connect via WhatsApp",
+    "admin1_role": "Sales & Consultation",
+    "admin2_role": "Technical Support",
+    "chat_via_wa": "Chat via WhatsApp"
+  },
+  "footer": {
+    "desc": "We help businesses grow through modern, fast, secure, and easy-to-use websites.",
+    "badges": {
+      "consultation": "Free Consultation",
+      "speed": "Fast Delivery",
+      "design": "Premium Design",
+      "security": "Secure Website"
+    },
+    "quick_links": "Quick Links",
+    "contact_title": "Contact Us",
+    "hours_title": "Business Hours",
+    "hours_value": "Monday–Saturday · 09:00–21:00 WIB",
+    "response_title": "Response Time",
+    "response_value": "±5 Minutes (Fast Response)",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright_text": "All Rights Reserved."
+  }
+}

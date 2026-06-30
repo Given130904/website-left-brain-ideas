@@ -1,0 +1,356 @@
+{
+  "nav": {
+    "home": "Beranda",
+    "about": "Tentang",
+    "services": "Layanan",
+    "portfolio": "Portofolio",
+    "faq": "FAQ",
+    "contact": "Kontak",
+    "testimonials": "Testimoni",
+    "startProject": "Hubungi Admin"
+  },
+  "hero": {
+    "headline1": "Website Profesional",
+    "headline2": "untuk Bisnis Anda.",
+    "sub": "Kami membantu UMKM, perusahaan, sekolah, organisasi, hingga personal branding memiliki website yang modern, cepat, dan membuat pelanggan lebih percaya.",
+    "cta_primary": "Hubungi Admin",
+    "cta_secondary": "Lihat Portofolio",
+    "benefit1_title": "Konsultasi Gratis",
+    "benefit1_desc": "Bingung mulai dari mana? Ceritakan kebutuhan Anda, kami siap membantu memilih solusi yang tepat.",
+    "benefit2_title": "Harga Bersahabat",
+    "benefit2_desc": "Cocok untuk UMKM, bisnis baru, hingga personal branding dengan harga yang tetap terjangkau.",
+    "benefit3_title": "Desain Profesional",
+    "benefit3_desc": "Website modern, rapi, dan dipercaya pelanggan karena dikerjakan oleh tim yang berpengalaman.",
+    "benefit4_title": "Didampingi Sampai Online",
+    "benefit4_desc": "Kami membantu mulai dari perencanaan hingga website siap digunakan dan bisa diakses pelanggan."
+  },
+  "about": {
+    "badge": "Tentang Kami"
+  },
+  "philosophy": {
+    "badge": "Filosofi Kami",
+    "heading1": "Filosofi di Balik",
+    "heading2": "Left Brain Ideas",
+    "description": "Left Brain Ideas lahir dari keyakinan bahwa website terbaik tidak hanya mengandalkan logika yang kuat atau desain yang cantik saja, melainkan gabungan harmonis dari keduanya. Kami menyatukan presisi sistem rekayasa dengan keindahan visual yang memukau untuk membantu bisnis Anda tumbuh lebih cepat.",
+    "cards": {
+      "structured": {
+        "title": "Berpikir Terstruktur",
+        "desc": "Setiap halaman dan fitur dirancang secara logis berdasarkan data serta alur pengunjung yang matang, sehingga website mudah dipahami."
+      },
+      "intuitive": {
+        "title": "Desain yang Nyaman",
+        "desc": "Tampilan website yang elegan, rapi, dan modern. Kami memastikan setiap elemen visual nyaman dipandang agar pengunjung betah membaca."
+      },
+      "support": {
+        "title": "Pendampingan Sampai Selesai",
+        "desc": "Kami mendampingi Anda dari pendaftaran domain, pengelolaan website, hingga siap digunakan sepenuhnya tanpa rasa khawatir."
+      }
+    }
+  },
+  "services": {
+    "badge": "Layanan Kami",
+    "heading": "Solusi Digital Kami",
+    "featured_label": "Layanan Unggulan",
+    "discuss": "Diskusi Proyek",
+    "engineering": "Teknologi",
+    "design": "Desain",
+    "items": {
+      "custom_app": {
+        "title": "Website Kustom Khusus",
+        "desc": "Website dengan fungsi khusus sesuai kebutuhan unik bisnis Anda, mulai dari sistem pemesanan hingga database internal."
+      },
+      "web_dev": {
+        "title": "Website Profil Perusahaan",
+        "desc": "Website profil profesional untuk perusahaan yang ingin membangun reputasi dan kredibilitas di internet."
+      },
+      "landing": {
+        "title": "Halaman Promosi (Landing Page)",
+        "desc": "Halaman khusus yang dirancang untuk mempromosikan satu produk atau jasa agar terjadi penjualan lebih cepat."
+      },
+      "company": {
+        "title": "Website Profil Sekolah & Organisasi",
+        "desc": "Pusat informasi resmi untuk sekolah, yayasan, komite, atau organisasi dengan tampilan yang rapi dan mudah diakses."
+      },
+      "dashboard": {
+        "title": "Website Toko Online (E-Commerce)",
+        "desc": "Toko digital yang memudahkan pelanggan melihat produk, melakukan pemesanan, dan berbelanja secara otomatis."
+      },
+      "uiux": {
+        "title": "Desain Tampilan Website (UI/UX)",
+        "desc": "Jasa merancang visual website yang cantik, modern, dan nyaman digunakan sebelum mulai dikembangkan."
+      },
+      "maintenance": {
+        "title": "Pemeliharaan Website",
+        "desc": "Jasa merawat website Anda agar selalu aman, diperbarui secara berkala, dan bebas dari error."
+      },
+      "responsive": {
+        "title": "Optimasi Tampilan HP",
+        "desc": "Membuat website yang sudah Anda miliki menjadi sangat nyaman dibuka dari handphone maupun tablet."
+      }
+    }
+  },
+  "portfolio": {
+    "badge": "Karya Terpilih",
+    "heading": "Proyek Terbaru",
+    "sub": "Pilihan website berkualitas yang telah kami rancang dan kembangkan.",
+    "cta": "Lihat Detail Proyek",
+    "cta_live": "Live Demo",
+    "login_required": "Login Required",
+    "filters": {
+      "all": "Semua",
+      "company_profile": "Profil Perusahaan",
+      "dashboard": "Dashboard",
+      "ecommerce": "E-Commerce",
+      "travel": "Travel",
+      "management_system": "Sistem Manajemen"
+    },
+    "projects": {
+      "kala_creative": {
+        "name": "Kala Creative",
+        "category": "Company Profile",
+        "desc": "Website portofolio agensi kreatif premium yang menampilkan layanan desain visual, fotografi, dan pemasaran digital."
+      },
+      "brains_idea_store": {
+        "name": "Brains Idea Store",
+        "category": "E-Commerce Website",
+        "desc": "Platform e-commerce dan toko digital yang menawarkan produk digital dan aset kreatif dengan pengiriman instan otomatis."
+      },
+      "tedomise": {
+        "name": "Tedomise",
+        "category": "Company Profile",
+        "desc": "Profil resmi perusahaan Tedomise, konsultan teknologi yang berspesialisasi dalam solusi TI dan rekayasa perangkat lunak."
+      },
+      "sistem_stok_kkp": {
+        "name": "Sistem Stok KKP",
+        "category": "Dashboard System",
+        "desc": "Sistem pelacakan inventaris dan pemantauan stok kelas perusahaan dengan visualisasi data real-time dan analisis tingkat lanjut."
+      },
+      "kalatrip": {
+        "name": "KalaTrip",
+        "category": "Travel Website",
+        "desc": "Halaman promosi perjalanan modern dan pusat pemesanan tur dengan penjelajah paket dinamis dan rencana perjalanan yang lengkap."
+      },
+      "nike_dashboard": {
+        "name": "Nike Dashboard",
+        "category": "Dashboard UI",
+        "desc": "Antarmuka dashboard dengan ketelitian tinggi yang menampilkan performa penjualan e-commerce, statistik katalog sepatu, dan pertumbuhan pengguna."
+      },
+      "jurnal_sdm": {
+        "name": "Jurnal SDM",
+        "category": "Human Resource System",
+        "desc": "Sistem manajemen sumber daya manusia yang aman untuk melacak kehadiran karyawan, analisis penggajian, dan evaluasi kinerja."
+      },
+      "gudangin_stok": {
+        "name": "Gudangin Stok",
+        "category": "Inventory Management",
+        "desc": "Alat manajemen inventaris gudang untuk memantau stok masuk, keluar, dan peringatan stok menipis secara real-time."
+      }
+    }
+  },
+  "techstack": {
+    "badge": "Teknologi",
+    "heading": "Teknologi yang Kami Gunakan"
+  },
+  "feedback": {
+    "title": "Bagaimana Pendapat Anda?",
+    "subtitle": "Masukan Anda membantu kami terus meningkatkan kualitas layanan.",
+    "success": "Terima kasih atas penilaian Anda ❤️",
+    "rating_summary": "Penilaian: {{rating}} / 10 · Left Brain Ideas"
+  },
+  "why": {
+    "badge": "Kelebihan Kami",
+    "heading1": "Lebih dari Sekadar",
+    "heading2": "Website Cantik",
+    "sub": "Setiap piksel memiliki tujuan. Setiap baris kode memiliki maksud. Kami membangun produk digital yang dirancang untuk performa, keamanan, dan pertumbuhan nyata bisnis Anda.",
+    "cards": {
+      "performance": {
+        "title": "Website Sangat Cepat",
+        "desc": "Website yang cepat membuat pengunjung nyaman dan tidak meninggalkan halaman sebelum membaca produk Anda.",
+        "tags": ["Sangat Cepat", "Ringan Diakses", "Tanpa Lemot"]
+      },
+      "security": {
+        "title": "Sistem Aman",
+        "desc": "Kami menjaga website Anda dengan standar keamanan terbaik agar terhindar dari serangan siber dan hacker.",
+        "tags": ["Aman", "Proteksi Data", "Selalu Online"]
+      },
+      "ux": {
+        "title": "Tampilan Modern",
+        "desc": "Desain elegan, rapi, dan mudah dibaca oleh calon pelanggan Anda baik di HP maupun Laptop.",
+        "tags": ["Indah & Rapi", "Nyaman Dibuka", "Mudah Dibaca"]
+      },
+      "scalable": {
+        "title": "Siap untuk Bisnis Berkembang",
+        "desc": "Website yang fleksibel dan dapat terus berkembang mengikuti kemajuan usaha dan bisnis Anda.",
+        "tags": ["Mudah Di-update", "Siap Berkembang", "Terstruktur"]
+      }
+    }
+  },
+  "process": {
+    "badge": "Cara Kami Bekerja",
+    "heading": "Proses Pembuatan Website",
+    "sub": "Kami bekerja dalam fase terstruktur untuk menjamin keindahan desain dan keandalan sistem.",
+    "steps": {
+      "step1": {
+        "title": "Konsultasi",
+        "desc": "Kami mendengar ide dan visi bisnis Anda, mendiskusikan kebutuhan teknis, serta menyusun strategi digital yang tepat sasaran secara gratis."
+      },
+      "step2": {
+        "title": "Desain",
+        "desc": "Merancang visual website yang modern, elegan, dan nyaman dipandang agar sesuai dengan identitas bisnis Anda serta memikat calon pembeli."
+      },
+      "step3": {
+        "title": "Pengembangan Website",
+        "desc": "Mengubah desain menjadi website nyata dengan kode bersih. Menghasilkan performa loading cepat, responsif, dan lancar dibuka dari handphone."
+      },
+      "step4": {
+        "title": "Keamanan & Pengujian",
+        "desc": "Melakukan uji coba menyeluruh di berbagai HP dan browser, serta menerapkan sistem keamanan ketat agar website bebas dari gangguan hacker."
+      },
+      "step5": {
+        "title": "Launching & Pendampingan",
+        "desc": "Website Anda resmi diluncurkan online. Kami siap mendampingi Anda untuk mengelola domain, hosting, dan melakukan pemeliharaan rutin."
+      }
+    }
+  },
+  "security": {
+    "badge": "Keamanan Bisnis Anda",
+    "heading": "Website Aman dan Bebas Khawatir",
+    "sub": "Kami memastikan website Anda terlindungi penuh dengan standar keamanan modern. Anda tidak perlu pusing memikirkan masalah teknis, database bocor, atau server down. Fokuslah mengembangkan bisnis Anda, biar kami menjaga rumah digital Anda.",
+    "checklist": {
+      "code": "Struktur kode rapi (Membuat website mudah dikembangkan & bebas error)",
+      "speed": "Website sangat cepat (Pengunjung betah membaca & tidak lekas pergi)",
+      "data": "Perlindungan data aman (Menjaga informasi kontak dan data pelanggan Anda)",
+      "scale": "Mudah dikembangkan (Siap ditambah fitur baru kapan saja bisnis Anda tumbuh)",
+      "longterm": "Siap digunakan jangka panjang (Menggunakan teknologi modern yang relevan bertahun-tahun)"
+    },
+    "run_btn": "Uji Keamanan Website",
+    "running_btn": "Memeriksa website...",
+    "status": "PEMERIKSAAN SELESAI: WEBSITE 100% AMAN & OPTIMAL"
+  },
+  "testimonials": {
+    "badge": "Ulasan Klien",
+    "heading": "Apa Kata Mereka",
+    "left": [
+      {
+        "name": "Sarah Pratiwi",
+        "company": "Owner Hijab Store",
+        "review": "Awalnya bingung mau mulai dari mana buat online shop hijab saya. Untung konsultasinya gratis dan adminnya ramah banget ngejelasin dari nol. Pas webnya jadi, cakep bener, dipake belanja di HP lancar pol gak pake lemot."
+      },
+      {
+        "name": "Budi Santoso",
+        "company": "Owner CV Karya Mandiri",
+        "review": "Komunikasi sama tim Left Brain Ideas bener-bener gampang. Tiap revisi langsung ditangkep cepet, gak ribet. Hasil desain company profile kami malah melebihi ekspektasi awal, keliatan profesional banget pas dipresentasiin ke klien."
+      },
+      {
+        "name": "Elena Kusuma",
+        "company": "Pengelola Klinik Pratama",
+        "review": "Sebagai pemula di dunia digital, saya sempet takut gak ngerti cara ngurus web. Tapi diajarin pelan-pelan sampai paham. Harganya juga masuk akal buat kantong klinik kecil kami, sekarang pasien jadi lebih percaya pas mau daftar online."
+      },
+      {
+        "name": "Dedi Hermawan",
+        "company": "Owner Kuliner Nusantara",
+        "review": "Paling suka sama responnya yang cepet banget pas ada kendala di awal. Timnya super ngebantu. Sekarang resto kuliner kami keliatan jauh lebih terpercaya di mata customer sejak punya web resmi."
+      }
+    ],
+    "right": [
+      {
+        "name": "Sophia Siregar",
+        "company": "Humas Sekolah Harapan",
+        "review": "Web yayasan kami rapi banget dan loadingnya cepet pas dibuka wali murid. Proses revisi layout kemarin juga berjalan super mulus, gak ada drama salah paham. Keren layanannya."
+      },
+      {
+        "name": "Hendra Wijaya",
+        "company": "PT Logistik Maju",
+        "review": "Pertama kali bikin web disini langsung ngerasa terbantu banget sama penjelasan timnya yang gak teknis-teknis amat, jadi gampang dimengerti orang awam kayak saya. Komunikasi juga enak via WhatsApp."
+      },
+      {
+        "name": "Clara Anindita",
+        "company": "Founder Fashion Label",
+        "review": "Desainnya dapet banget vibe premiumnya, beda dari template pasaran. Buat brand fashion saya ini penting banget biar keliatan berkelas. Kerjanya cepet dan komunikatif."
+      },
+      {
+        "name": "Joko Prasetyo",
+        "company": "Owner Agribisnis Prima",
+        "review": "Layanan mantap, harganya ramah kantong tapi kualitas webnya gak kaleng-kaleng. Sangat ngebantu bisnis pertanian kami biar keliatan lebih modern dan dipercaya pembeli dari luar kota."
+      }
+    ]
+  },
+  "faq": {
+    "badge": "Ada Pertanyaan?",
+    "heading1": "Pertanyaan yang",
+    "heading2": "Sering Ditanyakan",
+    "sub": "Berikut beberapa jawaban untuk pertanyaan umum mengenai layanan kami.",
+    "ask_link": "Tanya langsung ke kami.",
+    "still_q": "Masih ada pertanyaan?",
+    "send_link": "Hubungi admin kami di WhatsApp →",
+    "items": {
+      "timeline": {
+        "q": "Berapa lama proses pembuatan website?",
+        "a": "Waktu pembuatan bervariasi tergantung kerumitan. Halaman promosi (landing page) selesai dalam 1-2 minggu. Website profil perusahaan atau toko online memakan waktu 2-4 minggu. Kami akan memberikan jadwal pengerjaan lengkap di awal diskusi."
+      },
+      "revisions": {
+        "q": "Apakah saya bisa meminta revisi?",
+        "a": "Tentu saja. Kami memberikan kesempatan revisi di setiap tahap utama — mulai dari persetujuan gambar desain hingga pengujian website sebelum online."
+      },
+      "hosting": {
+        "q": "Apakah Anda membantu menyiapkan domain & hosting?",
+        "a": "Ya. Kami membantu mengurus pendaftaran nama domain (.com, .co.id, dll) dan menyewakan server hosting yang cepat serta aman. Anda tinggal terima jadi."
+      },
+      "redesign": {
+        "q": "Apakah bisa mendesain ulang website lama saya?",
+        "a": "Sangat bisa. Kami dapat memperbarui tampilan website lama Anda agar lebih modern, mempercepat loading-nya, dan menyesuaikannya agar nyaman dibuka dari handphone."
+      },
+      "maintenance": {
+        "q": "Apakah ada garansi setelah website selesai?",
+        "a": "Kami memberikan garansi jika terjadi error atau kendala teknis. Kami juga menyediakan layanan perawatan bulanan agar website Anda selalu aman dan terbarui."
+      }
+    }
+  },
+  "contact": {
+    "badge": "Hubungi Kami",
+    "heading1": "Mari Bangun Website",
+    "heading2": "Luar Biasa Bersama",
+    "sub": "Siap meningkatkan profesionalisme bisnis Anda secara digital? Diskusikan ide Anda langsung dengan admin kami sekarang.",
+    "wa_label": "Konsultasi WhatsApp",
+    "email_label": "Email",
+    "ig_label": "Instagram",
+    "hours_label": "Jam Layanan",
+    "hours_value": "Senin–Sabtu · 09:00–21:00 WIB",
+    "form_name": "Nama Lengkap",
+    "form_email": "Alamat Email",
+    "form_message": "Tuliskan Kebutuhan Website Anda",
+    "form_placeholder_name": "Contoh: Budi Santoso",
+    "form_placeholder_email": "Contoh: budi@email.com",
+    "form_placeholder_message": "Ceritakan bidang usaha Anda dan tujuan pembuatan website ini...",
+    "submit": "Kirim via WhatsApp",
+    "submitting": "Mengirim...",
+    "success_title": "Pesan Terkirim!",
+    "success_sub": "Hubungi admin kami langsung untuk respon lebih cepat.",
+    "send_another": "Pesan Lain",
+    "response_label": "Respon Cepat",
+    "response_value": "Rata-rata < 10 menit",
+    "cta_main": "Mulai Konsultasi Gratis Sekarang",
+    "cta_sub": "Tidak perlu registrasi · Langsung terhubung via WhatsApp",
+    "admin1_role": "Sales & Konsultasi",
+    "admin2_role": "Technical Support",
+    "chat_via_wa": "Chat via WhatsApp"
+  },
+  "footer": {
+    "desc": "Kami membantu bisnis berkembang melalui website modern, cepat, aman, dan mudah digunakan.",
+    "badges": {
+      "consultation": "Konsultasi Gratis",
+      "speed": "Pengerjaan Cepat",
+      "design": "Desain Premium",
+      "security": "Website Aman"
+    },
+    "quick_links": "Tautan Cepat",
+    "contact_title": "Hubungi Kami",
+    "hours_title": "Jam Operasional",
+    "hours_value": "Senin–Sabtu · 09:00–21:00 WIB",
+    "response_title": "Waktu Respon",
+    "response_value": "±5 Menit (Fast Response)",
+    "privacy": "Kebijakan Privasi",
+    "terms": "Syarat Ketentuan",
+    "copyright_text": "Hak Cipta Dilindungi Undang-Undang."
+  }
+}
