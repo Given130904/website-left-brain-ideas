@@ -1,23 +1,32 @@
-import { motion } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { ArrowLeft, ArrowRight, Quote } from 'lucide-react';
 import Badge from '../ui/Badge';
 
 const EASE = [0.16, 1, 0.3, 1] as any;
 
-interface TestimonialItem {
+interface Testimonial {
   name: string;
   company: string;
   review: string;
   rating: number;
 }
 
-// Dynamic list loading is performed inside the component now
-
 function StarRating({ count }: { count: number }) {
   return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: count }).map((_, i) => (
-        <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill="#F59E0B" xmlns="http://www.w3.org/2000/svg">
+    <div className="flex gap-0.5 justify-center">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg 
+          key={i} 
+          width="14" 
+          height="14" 
+          viewBox="0 0 24 24" 
+          fill={i < count ? "#F59E0B" : "rgba(255,255,255,0.06)"} 
+          stroke={i < count ? "#F59E0B" : "rgba(255,255,255,0.15)"}
+          strokeWidth="1.5"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ))}
@@ -25,123 +34,201 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-function TestimonialCard({ item, accentColor }: { item: TestimonialItem; accentColor: string }) {
-  return (
-    <motion.div
-      whileHover={{
-        y: -5,
-        scale: 1.015,
-        borderColor: `${accentColor}30`,
-        boxShadow: `0 12px 32px rgba(34, 211, 238, 0.04), 0 0 0 1px ${accentColor}20`
-      }}
-      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="w-[280px] sm:w-[320px] flex-shrink-0 flex flex-col gap-4 p-6 rounded-2xl select-none cursor-default"
-      style={{
-        background: '#101010',
-        border: '1px solid rgba(255,255,255,0.08)',
-        backdropFilter: 'blur(16px)',
-        willChange: 'transform'
-      }}
-    >
-      <StarRating count={item.rating} />
-      <p className="text-[#B5B5B5] text-xs leading-relaxed font-sans flex-grow">
-        &ldquo;{item.review}&rdquo;
-      </p>
-      <div className="border-t border-white/5 pt-3 flex flex-col">
-        <span className="text-xs font-heading font-bold text-white">{item.name}</span>
-        <span className="text-[9px] font-mono text-[#B5B5B5] mt-0.5 uppercase tracking-wider">{item.company}</span>
-      </div>
-    </motion.div>
-  );
-}
-
 export default function TestimonialsSection() {
   const { t } = useTranslation();
+  
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { margin: '-50px' });
 
-  const testimonialsLeft = ((t('testimonials.left', { returnObjects: true }) as any[]) || []).map(item => ({
-    ...item,
-    rating: 5
-  })) as TestimonialItem[];
+  // Consolidate both left and right lists from localization into a single array
+  const testimonials = [
+    ...(((t('testimonials.left', { returnObjects: true }) as any[]) || []).map(item => ({ ...item, rating: 5 }))),
+    ...(((t('testimonials.right', { returnObjects: true }) as any[]) || []).map(item => ({ ...item, rating: 5 })))
+  ] as Testimonial[];
 
-  const testimonialsRight = ((t('testimonials.right', { returnObjects: true }) as any[]) || []).map(item => ({
-    ...item,
-    rating: 5
-  })) as TestimonialItem[];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+
+  const handleNext = () => {
+    setDirection(1);
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  };
+
+  const handlePrev = () => {
+    setDirection(-1);
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  };
+
+  const activeTestimonial = testimonials[currentIndex];
+
+  const slideVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 80 : -80,
+      opacity: 0,
+      scale: 0.97
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.5, ease: EASE }
+    },
+    exit: (dir: number) => ({
+      x: dir < 0 ? 80 : -80,
+      opacity: 0,
+      scale: 0.97,
+      transition: { duration: 0.4, ease: EASE }
+    })
+  };
+
+  if (testimonials.length === 0) return null;
 
   return (
     <section
       id="testimonials"
-      className="py-24 md:py-32 relative overflow-hidden bg-[#050505] border-t border-white/8"
+      ref={sectionRef}
+      className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes marquee-left {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        @keyframes marquee-right {
-          0% { transform: translateX(-50%); }
-          100% { transform: translateX(0); }
-        }
-        .marquee-left-track { animation: marquee-left 32s linear infinite; }
-        .marquee-right-track { animation: marquee-right 32s linear infinite; }
-        .marquee-wrapper-left:hover .marquee-left-track {
-          animation-play-state: paused;
-        }
-        .marquee-wrapper-right:hover .marquee-right-track {
-          animation-play-state: paused;
-        }
-      `}} />
+      {/* Background glow highlights */}
+      <div className="absolute top-[30%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,transparent_70%)] filter blur-[110px] pointer-events-none -z-10 animate-pulse-glow" />
+      <div className="absolute bottom-[30%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.015)_0%,transparent_70%)] filter blur-[110px] pointer-events-none -z-10" />
 
-      {/* Edge fade masks */}
-      <div className="absolute left-0 top-0 bottom-0 w-24 z-20 pointer-events-none bg-gradient-to-r from-[#050505] to-transparent" />
-      <div className="absolute right-0 top-0 bottom-0 w-24 z-20 pointer-events-none bg-gradient-to-l from-[#050505] to-transparent" />
+      {/* Floating particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className={`absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-cyan-400/20 filter blur-xs ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '7s' }} />
+        <div className={`absolute bottom-[20%] right-[15%] w-3 h-3 rounded-full bg-blue-400/10 filter blur-[1px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '10s', animationDelay: '2s' }} />
+      </div>
 
-      <div className="w-full relative z-10">
-
+      <div className="container relative z-10 max-w-[800px] mx-auto px-6">
+        
         {/* Section Header */}
-        <div className="text-center max-w-[640px] mx-auto mb-16 px-6">
+        <div className="text-center max-w-[640px] mx-auto mb-16">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-4"
+            className="mb-4 inline-block"
           >
-            <Badge variant="muted">{t('testimonials.badge')}</Badge>
+            <Badge variant="cyan">{t('testimonials.badge')}</Badge>
           </motion.div>
+          
           <motion.h2
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-heading font-extrabold text-white tracking-tight"
+            className="text-4xl sm:text-5xl font-heading font-extrabold text-white leading-tight text-gradient-white"
           >
             {t('testimonials.heading')}
           </motion.h2>
         </div>
 
-        {/* Row 1: Scrolls left — pauses only this row on hover */}
-        <div className="w-full overflow-hidden mb-5 marquee-wrapper-left">
-          <div className="flex gap-5 marquee-left-track py-2">
-            {testimonialsLeft.map((item, idx) => (
-              <TestimonialCard key={`l1-${idx}`} item={item} accentColor="#22D3EE" />
-            ))}
-            {testimonialsLeft.map((item, idx) => (
-              <TestimonialCard key={`l2-${idx}`} item={item} accentColor="#22D3EE" />
-            ))}
-          </div>
-        </div>
+        {/* Dynamic Carousel Frame */}
+        <div className="relative w-full flex flex-col items-center">
+          
+          {/* Main Card with AnimatePresence */}
+          <div className="relative w-full overflow-hidden min-h-[320px] sm:min-h-[260px] flex items-center justify-center p-1">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.4}
+                onDragEnd={(_, { offset }) => {
+                  if (offset.x > 60) handlePrev();
+                  else if (offset.x < -60) handleNext();
+                }}
+                className="w-full rounded-[24px] bg-neutral-900/40 backdrop-blur-xl border border-white/8 p-8 sm:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.6)] flex flex-col justify-between items-center text-center cursor-grab active:cursor-grabbing select-none"
+                style={{ willChange: 'transform, opacity' }}
+              >
+                {/* Quote Icon styling */}
+                <div className="text-cyan-400/20 mb-6 shrink-0">
+                  <Quote className="w-10 h-10 fill-cyan-400/5 rotate-180" />
+                </div>
 
-        {/* Row 2: Scrolls right — pauses only this row on hover */}
-        <div className="w-full overflow-hidden marquee-wrapper-right">
-          <div className="flex gap-5 marquee-right-track py-2">
-            {testimonialsRight.map((item, idx) => (
-              <TestimonialCard key={`r1-${idx}`} item={item} accentColor="#22D3EE" />
-            ))}
-            {testimonialsRight.map((item, idx) => (
-              <TestimonialCard key={`r2-${idx}`} item={item} accentColor="#22D3EE" />
-            ))}
+                {/* Testimonial body */}
+                <p className="text-base sm:text-lg text-text-secondary leading-relaxed font-sans font-medium mb-8 max-w-[620px]">
+                  &ldquo;{activeTestimonial.review}&rdquo;
+                </p>
+
+                {/* Rating & Profile details */}
+                <div className="flex flex-col items-center gap-3 shrink-0">
+                  <StarRating count={activeTestimonial.rating} />
+                  <div className="flex flex-col">
+                    <span className="text-sm font-heading font-bold text-white tracking-wide">
+                      {activeTestimonial.name}
+                    </span>
+                    <span className="text-[10px] font-mono text-cyan-400 uppercase tracking-widest mt-1">
+                      {activeTestimonial.company}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
+
+          {/* Draggable indicator hint (Mobile only) */}
+          <span className="text-[9px] font-mono text-white/20 mt-4 md:hidden uppercase tracking-widest pointer-events-none">
+            ← Geser untuk Membaca Lainnya →
+          </span>
+
+          {/* Navigation Controls (Arrows + Dots) */}
+          <div className="flex items-center justify-between w-full mt-10 px-4">
+            
+            {/* Left Button */}
+            <motion.button
+              onClick={handlePrev}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center text-[#B5B5B5] hover:text-[#22D3EE] hover:border-[#22D3EE]/30 transition-all duration-300 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </motion.button>
+
+            {/* Indicator Dots */}
+            <div className="flex gap-2">
+              {testimonials.map((_, idx) => {
+                const isActive = idx === currentIndex;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setDirection(idx > currentIndex ? 1 : -1);
+                      setCurrentIndex(idx);
+                    }}
+                    className="relative py-2 px-1 cursor-pointer select-none group"
+                  >
+                    <motion.div
+                      animate={{
+                        width: isActive ? 20 : 6,
+                        backgroundColor: isActive ? '#22D3EE' : 'rgba(255, 255, 255, 0.15)',
+                      }}
+                      transition={{ duration: 0.3, ease: EASE }}
+                      className="h-1.5 rounded-full group-hover:bg-white/40"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right Button */}
+            <motion.button
+              onClick={handleNext}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="w-10 h-10 rounded-full bg-white/3 border border-white/5 flex items-center justify-center text-[#B5B5B5] hover:text-[#22D3EE] hover:border-[#22D3EE]/30 transition-all duration-300 cursor-pointer"
+            >
+              <ArrowRight className="w-4 h-4" />
+            </motion.button>
+
+          </div>
+
         </div>
 
       </div>

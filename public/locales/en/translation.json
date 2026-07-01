@@ -25,21 +25,29 @@
     "benefit4_desc": "We help from planning until the website is ready to use and accessible to customers."
   },
   "about": {
-    "badge": "Who We Are",
-    "heading1": "Where Logic",
-    "heading2": "Meets Creativity",
+    "badge": "About Us",
+    "heading1": "Why Choose",
+    "heading2": "Left Brain Ideas?",
     "left_brain_title": "The Left Brain",
-    "left_brain_text": "Represents logic, structured systems, strict backend engineering, performance optimizations, and parameter-hardening security protocols.",
+    "left_brain_text": "Represents logical architecture, robust backend systems, loading speed optimizations, and proactive data protection security measures.",
     "ideas_title": "The Ideas Core",
-    "ideas_text": "Represents user experience innovation, sleek visual identities, glassmorphism layouts, custom fluid elements, and rich responsive aesthetics.",
-    "synergy_title": "Synthesized Synergy",
-    "synergy_text": "Together, they create production-grade web systems that compile seamlessly, load instantly, and establish trust at first glance."
+    "ideas_text": "Represents user interface innovation, sleek branding, clean glassmorphic panels, and beautiful responsive experiences.",
+    "synergy_title": "Synthesized Solutions",
+    "synergy_text": "Together, they build world-class web systems that load instantly, secure your database, and establish credibility at first glance.",
+    "stats": {
+      "projects_value": "15",
+      "projects_label": "Projects Completed",
+      "speed_value": "99",
+      "speed_label": "Access Score",
+      "satisfaction_value": "100",
+      "satisfaction_label": "Client Satisfaction"
+    }
   },
   "philosophy": {
-    "badge": "Our Philosophy",
-    "heading1": "The Philosophy Behind",
-    "heading2": "Left Brain Ideas",
-    "description": "Left Brain Ideas is built on the conviction that the best websites are not built on solid logic or beautiful aesthetics alone, but on a harmonious combination of both. We synthesize strict system engineering precision with stunning visual beauty to help your business scale.",
+    "badge": "Our Approach",
+    "heading1": "How We Build Websites",
+    "heading2": "That Deliver Results",
+    "description": "We believe a high-converting website needs both concrete technical logic and visually stunning interfaces. We blend precise engineering with clean aesthetics to help your business gain authority online.",
     "cards": {
       "structured": {
         "title": "Structured Thinking",
@@ -103,6 +111,7 @@
     "sub": "A selection of digital products we have designed and engineered.",
     "cta": "View Case Study",
     "cta_live": "Live Demo",
+    "cta_try": "🚀 Try Website",
     "login_required": "Login Required",
     "filters": {
       "all": "All",
@@ -149,9 +158,14 @@
         "desc": "A secure human resources management system designed to track employee attendance, payroll analytics, and evaluations."
       },
       "gudangin_stok": {
-        "name": "Gudangin Stok",
-        "category": "Inventory Management",
+        "name": "Inventory System",
+        "category": "Inventory System",
         "desc": "An inventory management tool for warehouses to monitor stock incoming, outgoing, and low-quantity alerts in real-time."
+      },
+      "weather_dashboard": {
+        "name": "Weather Dashboard",
+        "category": "Dashboard",
+        "desc": "Modern weather dashboard with real-time weather, AQI, UV Index and 7-day forecast."
       }
     }
   },
@@ -193,30 +207,66 @@
       }
     }
   },
+  "why_choose": {
+    "badge": "Why Us",
+    "heading": "Why Clients Choose Left Brain Ideas",
+    "sub": "We deliver pixel-perfect digital solutions designed to help your business scale.",
+    "cards": {
+      "consultation": {
+        "title": "Free Consultation",
+        "desc": "We help clients find the best solution before starting."
+      },
+      "design": {
+        "title": "Premium Design",
+        "desc": "Modern, clean and user-friendly interface."
+      },
+      "development": {
+        "title": "Fast Development",
+        "desc": "Efficient workflow with clear progress updates."
+      },
+      "security": {
+        "title": "Secure Website",
+        "desc": "Built with performance and security in mind."
+      },
+      "responsive": {
+        "title": "Fully Responsive",
+        "desc": "Perfect on phones, tablets and desktop."
+      },
+      "support": {
+        "title": "Friendly Support",
+        "desc": "Easy communication before, during and after the project."
+      }
+    }
+  },
   "process": {
-    "badge": "How We Work",
-    "heading": "Our Development Process",
+    "badge": "Our Approach",
+    "heading": "Easy, Transparent, and Focused Workflow",
     "sub": "We work in systematic phases to guarantee structural code security and UI aesthetic elegance.",
     "steps": {
       "step1": {
         "title": "Consultation",
-        "desc": "We listen to your business vision, discuss technical requirements, and map out the ideal digital strategy for free."
+        "desc": "We listen to your business vision, discuss technical requirements, and map out the ideal digital strategy for free.",
+        "duration": "1 Day"
       },
       "step2": {
         "title": "Design",
-        "desc": "Designing a modern, elegant, and user-friendly visual layout that matches your brand identity and captivates your audience."
+        "desc": "Designing a modern, elegant, and user-friendly visual layout that matches your brand identity and captivates your audience.",
+        "duration": "3-5 Days"
       },
       "step3": {
         "title": "Website Development",
-        "desc": "Translating designs into real code. We ensure lightning-fast loading speeds, robust responsiveness, and perfect mobile views."
+        "desc": "Translating designs into real code. We ensure lightning-fast loading speeds, robust responsiveness, and perfect mobile views.",
+        "duration": "1-2 Weeks"
       },
       "step4": {
         "title": "Security & Testing",
-        "desc": "Running comprehensive audits across multiple devices and browsers, while integrating strict security shields to prevent vulnerabilities."
+        "desc": "Running comprehensive audits across multiple devices and browsers, while integrating strict security shields to prevent vulnerabilities.",
+        "duration": "2-3 Days"
       },
       "step5": {
         "title": "Launching & Assistance",
-        "desc": "Your website goes officially live. We stay by your side to assist with domains, hosting setups, and continuous maintenance."
+        "desc": "Your website goes officially live. We stay by your side to assist with domains, hosting setups, and continuous maintenance.",
+        "duration": "1 Day"
       }
     }
   },
@@ -335,8 +385,8 @@
     "success_title": "Message Sent!",
     "success_sub": "We received your message and will get back to you within 24 hours.",
     "send_another": "Send Another Message",
-    "response_label": "Fast Response",
-    "response_value": "Average < 10 minutes",
+    "response_label": "⚡ Fast Response & Response Time",
+    "response_value": "Average Reply: 10–30 Minutes (During Working Hours)",
     "cta_main": "Start Free Consultation Now",
     "cta_sub": "No registration needed · Instantly connect via WhatsApp",
     "admin1_role": "Sales & Consultation",
@@ -356,7 +406,7 @@
     "hours_title": "Business Hours",
     "hours_value": "Monday–Saturday · 09:00–21:00 WIB",
     "response_title": "Response Time",
-    "response_value": "±5 Minutes (Fast Response)",
+    "response_value": "Average Reply: 10–30 Minutes",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "copyright_text": "All Rights Reserved."

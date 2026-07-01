@@ -1,14 +1,208 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useInView } from 'framer-motion';
 import { ArrowRight, Globe, ShoppingBag, LayoutDashboard, Compass, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Badge from '../ui/Badge';
 
 const EASE = [0.16, 1, 0.3, 1] as any;
 
+interface ProjectCardProps {
+  project: any;
+  index: number;
+  t: any;
+  isDimmed: boolean;
+  onHoverStart: () => void;
+  onHoverEnd: () => void;
+  isInView: boolean;
+}
+
+// 3D Parallax Tilt Card Component
+function ProjectCard({ project, index, t, isDimmed, onHoverStart, onHoverEnd, isInView }: ProjectCardProps) {
+  const cardRef = useRef<HTMLAnchorElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Motion values for tilt
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  // Subtle 3D tilt (max 5 degrees for premium feel)
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [5, -5]), { stiffness: 220, damping: 22 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-5, 5]), { stiffness: 220, damping: 22 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const mouseX = (e.clientX - rect.left) / rect.width - 0.5;
+    const mouseY = (e.clientY - rect.top) / rect.height - 0.5;
+    
+    x.set(mouseX);
+    y.set(mouseY);
+  };
+  
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+    setIsHovered(false);
+    onHoverEnd();
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+    onHoverStart();
+  };
+
+  return (
+    <motion.a
+      ref={cardRef}
+      href={project.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: 'preserve-3d',
+        willChange: 'transform, opacity',
+      }}
+      // Floating and dimming animations combined to prevent duplicate JSX properties
+      animate={
+        isHovered 
+          ? { y: -10, opacity: isDimmed ? 0.45 : 1 } 
+          : isInView 
+            ? { y: [0, -6, 0], opacity: isDimmed ? 0.45 : 1 } 
+            : { y: 0, opacity: isDimmed ? 0.45 : 1 }
+      }
+      transition={
+        isHovered 
+          ? { duration: 0.3, ease: EASE } 
+          : {
+              y: {
+                repeat: Infinity,
+                duration: 6,
+                ease: "easeInOut",
+                delay: index * 0.3,
+              },
+              opacity: {
+                duration: 0.3,
+                ease: EASE
+              }
+            }
+      }
+      className="relative flex flex-col w-full h-full rounded-[20px] bg-neutral-900/40 backdrop-blur-xl border border-white/8 p-3 transition-colors duration-300 select-none group"
+    >
+      {/* High-performance glowing shadow backdrop element (only animates opacity) */}
+      <div 
+        className="absolute inset-0 rounded-[20px] bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 blur-xl shadow-[0_0_40px_-5px_rgba(34,211,238,0.25)]" 
+        style={{ willChange: 'opacity' }}
+      />
+      
+      {/* High-performance border glow element (only animates opacity) */}
+      <div 
+        className="absolute inset-0 rounded-[20px] border border-cyan-400/35 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" 
+        style={{ willChange: 'opacity' }}
+      />
+
+      {/* Realistic Browser Mockup Preview Container */}
+      <div 
+        className="relative aspect-[16/9] w-full overflow-hidden rounded-[16px] border border-white/5 bg-neutral-950 flex flex-col group/browser"
+        style={{ transform: 'translateZ(12px)', willChange: 'transform' }}
+      >
+        {/* Browser Top Bar */}
+        <div className="h-7 bg-[#111111]/90 border-b border-white/5 flex items-center px-3 gap-2 shrink-0 select-none rounded-t-[16px]">
+          {/* Traffic light control dots */}
+          <div className="flex gap-1.5 shrink-0">
+            <span className="w-2 h-2 rounded-full bg-[#FF5F56] opacity-80" />
+            <span className="w-2 h-2 rounded-full bg-[#FFBD2E] opacity-80" />
+            <span className="w-2 h-2 rounded-full bg-[#27C93F] opacity-80" />
+          </div>
+          {/* Address Bar */}
+          <div className="mx-auto bg-white/[0.03] border border-white/5 rounded-md h-4 px-4 flex items-center justify-center max-w-[155px] truncate">
+            <span className="text-[8px] font-mono text-white/30 tracking-wide select-none">
+              {project.url.replace('https://', '').replace('www.', '').split('/')[0]}
+            </span>
+          </div>
+        </div>
+
+        {/* Local Screenshot Area */}
+        <div className="relative flex-1 overflow-hidden bg-neutral-900">
+          <img
+            src={project.thumbnail}
+            alt={project.name}
+            className="w-full h-full object-cover object-top transition-transform duration-[1200ms] ease-out group-hover/browser:scale-103"
+            loading="lazy"
+            style={{ willChange: 'transform' }}
+          />
+          
+          {/* Glass Reflection Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-transparent pointer-events-none z-10" />
+
+          {/* Semi-translucent Overlay */}
+          <div className="absolute inset-0 bg-black/15 group-hover/browser:bg-black/35 transition-colors duration-300 pointer-events-none z-10" />
+        </div>
+        
+        {/* Category Badge overlay on top-left of preview, placed under the browser bar */}
+        <div className="absolute top-9 left-3 z-20 px-2.5 py-0.5 bg-black/60 backdrop-blur-md border border-white/10 rounded-full text-[8px] font-heading font-extrabold tracking-wider text-cyan-400 shadow-[0_2px_10px_rgba(0,0,0,0.5)] flex items-center gap-1 uppercase select-none">
+          {project.icon}
+          <span>{t(`portfolio.projects.${project.id.replace(/-/g, '_')}.category`)}</span>
+        </div>
+
+        {/* Status Overlay top-right, under the browser bar */}
+        {project.loginRequired ? (
+          <span className="absolute top-9 right-3 z-20 px-2 py-0.5 bg-amber-500/10 backdrop-blur-md border border-amber-500/20 rounded-full text-[8px] font-bold text-amber-400 flex items-center gap-1 shadow-[0_2px_10px_rgba(0,0,0,0.5)] select-none">
+            <span>🔒 {t('portfolio.login_required')}</span>
+          </span>
+        ) : (
+          <span className="absolute top-9 right-3 z-20 px-2 py-0.5 bg-emerald-500/10 backdrop-blur-md border border-emerald-500/20 rounded-full text-[8px] font-bold text-emerald-400 shadow-[0_2px_10px_rgba(0,0,0,0.5)] select-none">
+            Active
+          </span>
+        )}
+      </div>
+
+      {/* Details Section */}
+      <div 
+        className="px-3 pt-5 pb-2 flex flex-col flex-grow text-left"
+        style={{ transform: 'translateZ(18px)', willChange: 'transform' }}
+      >
+        <h3 className="text-lg font-heading font-extrabold text-white mb-2 group-hover:text-[#22D3EE] transition-colors duration-300">
+          {project.name}
+        </h3>
+        
+        <p className="text-text-secondary text-xs leading-relaxed mb-5 flex-grow line-clamp-2">
+          {t(`portfolio.projects.${project.id.replace(/-/g, '_')}.desc`)}
+        </p>
+
+        {/* Tech stack badges */}
+        <div className="flex flex-wrap gap-1.5 mb-6">
+          {project.technologies.map((tech: string) => (
+            <span
+              key={tech}
+              className="px-2 py-0.5 rounded bg-white/3 border border-white/6 text-[9px] font-mono text-text-secondary"
+            >
+              {tech}
+            </span>
+          ))}
+        </div>
+
+        {/* Live Demo button */}
+        <div className="w-full py-2.5 rounded-xl border border-white/10 group-hover:border-[#22D3EE]/30 bg-white/2 group-hover:bg-[#22D3EE]/5 text-xs font-semibold text-white group-hover:text-[#22D3EE] flex items-center justify-center gap-2 transition-all duration-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]">
+          <span>{isHovered ? t('portfolio.cta_try') : t('portfolio.cta_live')}</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
+        </div>
+      </div>
+    </motion.a>
+  );
+}
+
 export default function PortfolioSection() {
   const { t } = useTranslation();
   const [activeFilter, setActiveFilter] = useState('All');
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
+  // Ref to monitor viewport visibility and pause off-screen animations
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { margin: '-50px' });
 
   const filters = [
     { key: 'All', translateKey: 'all' },
@@ -21,15 +215,26 @@ export default function PortfolioSection() {
 
   const projects = [
     {
+      id: 'weather-dashboard',
+      name: 'Weather Dashboard',
+      url: 'https://weather-dashboard-pi-two.vercel.app',
+      category: 'Dashboard',
+      categoryKey: 'dashboard',
+      thumbnail: '/projects/weather-dashboard.png',
+      technologies: ['React', 'Vite', 'Tailwind CSS', 'OpenWeather API'],
+      accent: '#38BDF8',
+      icon: <LayoutDashboard className="w-3 h-3 text-sky-400" />,
+    },
+    {
       id: 'kala-creative',
       name: 'Kala Creative',
       url: 'https://kalacreative.my.id/',
       category: 'Company Profile',
       categoryKey: 'company_profile',
-      thumbnail: '/assets/images/kala_creative.png',
+      thumbnail: '/projects/kala-creative.png',
       technologies: ['React', 'TypeScript', 'Tailwind', 'Framer Motion'],
       accent: '#22D3EE',
-      icon: <Globe className="w-3.5 h-3.5" />,
+      icon: <Globe className="w-3 h-3 text-cyan-400" />,
     },
     {
       id: 'brains-idea-store',
@@ -37,44 +242,32 @@ export default function PortfolioSection() {
       url: 'https://brainsidea.store/',
       category: 'E-Commerce',
       categoryKey: 'ecommerce',
-      thumbnail: '/assets/images/brains_idea_store.png',
+      thumbnail: '/projects/brainsidea.png',
       technologies: ['Next.js', 'React', 'Tailwind', 'Shopify'],
       accent: '#3B82F6',
-      icon: <ShoppingBag className="w-3.5 h-3.5" />,
+      icon: <ShoppingBag className="w-3 h-3 text-blue-400" />,
     },
     {
       id: 'tedomise',
-      name: 'Tedomise',
+      name: 'TEDOMISE',
       url: 'https://www.tedomise.com/',
       category: 'Company Profile',
       categoryKey: 'company_profile',
-      thumbnail: '/assets/images/tedomise.png',
+      thumbnail: '/projects/tedomise.png',
       technologies: ['WordPress', 'PHP', 'MySQL', 'CSS'],
       accent: '#10B981',
-      icon: <Globe className="w-3.5 h-3.5" />,
+      icon: <Globe className="w-3 h-3 text-emerald-400" />,
     },
     {
-      id: 'sistem-stok-kkp',
-      name: 'Sistem Stok KKP',
-      url: 'https://stok-kkp-project.vercel.app/login',
-      category: 'Dashboard',
-      categoryKey: 'dashboard',
-      thumbnail: '/assets/images/sistem_stok_kkp.png',
-      technologies: ['Next.js', 'React', 'Tailwind', 'Prisma', 'PostgreSQL'],
-      accent: '#F59E0B',
-      icon: <LayoutDashboard className="w-3.5 h-3.5" />,
-      loginRequired: true,
-    },
-    {
-      id: 'kalatrip',
-      name: 'KalaTrip',
-      url: 'https://kalatrip.vercel.app/',
-      category: 'Travel',
-      categoryKey: 'travel',
-      thumbnail: '/assets/images/kalatrip.png',
-      technologies: ['React', 'Vite', 'Tailwind', 'Leaflet.js'],
-      accent: '#EF4444',
-      icon: <Compass className="w-3.5 h-3.5" />,
+      id: 'gudangin-stok',
+      name: 'Inventory System',
+      url: 'https://gudangin-stok.vercel.app/',
+      category: 'Management System',
+      categoryKey: 'management_system',
+      thumbnail: '/projects/inventory.png',
+      technologies: ['Next.js', 'Tailwind', 'Supabase', 'PostgreSQL'],
+      accent: '#14B8A6',
+      icon: <Database className="w-3 h-3 text-teal-400" />,
     },
     {
       id: 'nike-dashboard',
@@ -82,10 +275,21 @@ export default function PortfolioSection() {
       url: 'https://dashboard-nike.vercel.app/',
       category: 'Dashboard',
       categoryKey: 'dashboard',
-      thumbnail: '/assets/images/nike_dashboard.png',
+      thumbnail: '/projects/nike-dashboard.png',
       technologies: ['React', 'Tailwind', 'Recharts', 'Vite'],
       accent: '#EC4899',
-      icon: <LayoutDashboard className="w-3.5 h-3.5" />,
+      icon: <LayoutDashboard className="w-3 h-3 text-pink-400" />,
+    },
+    {
+      id: 'kalatrip',
+      name: 'Kala Trip',
+      url: 'https://kalatrip.vercel.app/',
+      category: 'Travel',
+      categoryKey: 'travel',
+      thumbnail: '/projects/kalatrip.png',
+      technologies: ['React', 'Vite', 'Tailwind', 'Leaflet.js'],
+      accent: '#EF4444',
+      icon: <Compass className="w-3 h-3 text-rose-400" />,
     },
     {
       id: 'jurnal-sdm',
@@ -93,22 +297,11 @@ export default function PortfolioSection() {
       url: 'https://jurnalsdm.vercel.app/login',
       category: 'Management System',
       categoryKey: 'management_system',
-      thumbnail: '/assets/images/jurnal_sdm.png',
+      thumbnail: '/projects/jurnalsdm.png',
       technologies: ['Next.js', 'Tailwind', 'Prisma', 'Supabase'],
       accent: '#8B5CF6',
-      icon: <Database className="w-3.5 h-3.5" />,
+      icon: <Database className="w-3 h-3 text-purple-400" />,
       loginRequired: true,
-    },
-    {
-      id: 'gudangin-stok',
-      name: 'Gudangin Stok',
-      url: 'https://gudangin-stok.vercel.app/',
-      category: 'Management System',
-      categoryKey: 'management_system',
-      thumbnail: '/assets/images/gudangin_stok.png',
-      technologies: ['Next.js', 'Tailwind', 'Supabase', 'PostgreSQL'],
-      accent: '#14B8A6',
-      icon: <Database className="w-3.5 h-3.5" />,
     },
   ];
 
@@ -116,64 +309,139 @@ export default function PortfolioSection() {
     ? projects
     : projects.filter((p) => p.category === activeFilter);
 
+  // Framer Motion container variants for staggered scrolling animation
+  const gridVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.08,
+      },
+    },
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 30, scale: 0.98 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: EASE,
+      },
+    },
+  };
+
+  // Stagger column layout on desktop/tablet to make it asymmetric
+  const getStaggerClass = (index: number) => {
+    // 3 columns on large screens
+    const lgOffset = index % 3 === 0 ? 'lg:mt-0' : index % 3 === 1 ? 'lg:mt-12' : 'lg:mt-24';
+    // 2 columns on medium screens
+    const mdOffset = index % 2 === 0 ? 'md:mt-0' : 'md:mt-12';
+    return `${lgOffset} ${mdOffset}`;
+  };
+
   return (
     <section
       id="portfolio"
-      className="py-24 md:py-32 relative overflow-hidden bg-[#050505] border-t border-white/8"
+      ref={sectionRef}
+      className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8 pb-48 lg:pb-64"
     >
-      <div className="absolute top-[30%] right-[10%] w-[350px] h-[350px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,transparent_70%)] filter blur-[85px] pointer-events-none -z-10" />
-      <div className="absolute bottom-[30%] left-[10%] w-[350px] h-[350px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.01)_0%,transparent_70%)] filter blur-[85px] pointer-events-none -z-10" />
+      {/* Animated scan-line top & bottom dividers (animations pause when section is offscreen) */}
+      <style>{`
+        @keyframes scan-line {
+          0% { left: -30%; }
+          100% { left: 130%; }
+        }
+        .animate-scan {
+          position: absolute;
+          top: 0;
+          height: 100%;
+          width: 30%;
+          animation: scan-line 8s linear infinite;
+        }
+      `}</style>
+      
+      {/* Top Divider */}
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-white/5 overflow-hidden">
+        <div className={`bg-gradient-to-r from-transparent via-[#22D3EE]/50 to-transparent ${isInView ? 'animate-scan' : 'absolute left-[-30%]'}`} />
+      </div>
+
+      {/* Bottom Divider */}
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-white/5 overflow-hidden">
+        <div className={`bg-gradient-to-r from-transparent via-[#3B82F6]/50 to-transparent ${isInView ? 'animate-scan' : 'absolute left-[-30%]'}`} style={{ animationDelay: '2s' }} />
+      </div>
+
+      {/* Premium ambient glows */}
+      <div className="absolute top-[15%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.03)_0%,transparent_70%)] filter blur-[110px] pointer-events-none -z-10 animate-pulse-glow" />
+      <div className="absolute bottom-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.02)_0%,transparent_70%)] filter blur-[130px] pointer-events-none -z-10" />
+
+      {/* Animated glowing particles (pauses when section is offscreen) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className={`absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-cyan-400/40 filter blur-xs ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '7s', animationDelay: '0s' }} />
+        <div className={`absolute top-[45%] right-[12%] w-3.5 h-3.5 rounded-full bg-blue-400/30 filter blur-[2px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '10s', animationDelay: '2.5s' }} />
+        <div className={`absolute bottom-[35%] left-[8%] w-1.5 h-1.5 rounded-full bg-[#22D3EE]/50 filter blur-none ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '6s', animationDelay: '1.2s' }} />
+        <div className={`absolute bottom-[15%] right-[22%] w-4 h-4 rounded-full bg-purple-500/20 filter blur-[3px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '13s', animationDelay: '3.8s' }} />
+      </div>
 
       <div className="container relative z-10">
         {/* Header */}
-        <div className="text-center max-w-[640px] mx-auto mb-12 px-6">
+        <div className="text-center max-w-[640px] mx-auto mb-16 px-6">
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-4"
+            className="mb-5"
           >
-            <Badge variant="muted">{t('portfolio.badge')}</Badge>
+            <Badge variant="cyan">{t('portfolio.badge')}</Badge>
           </motion.div>
+          
           <motion.h2
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
-            className="text-3xl sm:text-4xl lg:text-5xl font-heading font-extrabold text-white tracking-tight mb-4"
+            className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold text-white tracking-tight mb-5 text-gradient-white"
           >
             {t('portfolio.heading')}
           </motion.h2>
+          
           <motion.p
             initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
-            className="text-[#B5B5B5] text-sm sm:text-base leading-relaxed"
+            className="text-text-secondary text-sm sm:text-base leading-relaxed max-w-[540px] mx-auto"
           >
             {t('portfolio.sub')}
           </motion.p>
         </div>
 
-        {/* Filter Buttons */}
-        <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-16 px-6">
+        {/* Premium segmented filter controls */}
+        <div className="flex flex-wrap justify-center gap-1 md:gap-2 mb-20 px-3 py-2 bg-neutral-950/45 backdrop-blur-xl border border-white/5 rounded-full max-w-fit mx-auto shadow-[0_8px_32px_rgba(0,0,0,0.5)] relative z-20">
           {filters.map((filter) => {
             const isActive = activeFilter === filter.key;
             return (
               <button
                 key={filter.key}
                 onClick={() => setActiveFilter(filter.key)}
-                className={`relative px-4 py-2 text-[11px] font-semibold rounded-full cursor-pointer transition-all duration-300 border select-none ${
-                  isActive
-                    ? 'text-[#050505] border-[#22D3EE] bg-[#22D3EE]'
-                    : 'text-[#B5B5B5] border-white/8 bg-white/2 hover:text-white hover:border-white/20'
+                className={`relative px-4 py-2 text-[11px] md:text-xs font-bold rounded-full cursor-pointer select-none transition-all duration-300 ${
+                  isActive ? 'text-[#050505] font-extrabold' : 'text-[#B5B5B5] hover:text-white'
                 }`}
-                style={{
-                  boxShadow: isActive ? '0 0 16px rgba(34,211,238,0.3)' : 'none',
-                }}
               >
-                {t(`portfolio.filters.${filter.translateKey}`)}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeFilterBg"
+                    className="absolute inset-0 bg-[#22D3EE] rounded-full shadow-[0_0_20px_rgba(34,211,238,0.4)]"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    style={{ zIndex: -1 }}
+                  />
+                )}
+                <span className="relative z-10">
+                  {t(`portfolio.filters.${filter.translateKey}`)}
+                </span>
               </button>
             );
           })}
@@ -181,119 +449,29 @@ export default function PortfolioSection() {
 
         {/* Project Cards Grid */}
         <motion.div
-          layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full px-6 lg:px-0"
+          variants={gridVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 lg:gap-x-10 lg:gap-y-16 w-full px-6 lg:px-0"
         >
           <AnimatePresence mode="popLayout">
-            {filteredProjects.map((project) => (
-              <motion.a
+            {filteredProjects.map((project, index) => (
+              <motion.div
                 key={project.id}
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                layout
-                initial={{ opacity: 0, scale: 0.95, y: 24 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 24 }}
-                whileHover={{ y: -8 }}
-                transition={{
-                  layout: { duration: 0.6, ease: EASE },
-                  opacity: { duration: 0.4 },
-                  scale: { duration: 0.4 },
-                  y: { type: 'spring', stiffness: 300, damping: 22 },
-                }}
-                className="browser-mockup flex flex-col group block cursor-pointer"
-                style={{
-                  boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4)',
-                }}
+                variants={cardVariants}
+                className={getStaggerClass(index)}
               >
-                {/* Browser Top Bar */}
-                <div className="browser-bar">
-                  <div className="browser-dot red" />
-                  <div className="browser-dot yellow" />
-                  <div className="browser-dot green" />
-                  <div className="ml-3 text-[10px] font-mono text-white/35 truncate max-w-[170px]">
-                    {project.url.replace('https://', '').replace('www.', '')}
-                  </div>
-                </div>
-
-                {/* Screenshot Frame */}
-                <div className="browser-preview">
-                  <img
-                    src={project.thumbnail}
-                    alt={project.name}
-                    className="browser-screenshot group-hover:scale-[1.04]"
-                    loading="lazy"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        const fallback = document.createElement('div');
-                        fallback.className = 'absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#0B0B0B] border border-white/5';
-                        fallback.innerHTML = `<div style="width:48px;height:48px;border-radius:12px;background:${project.accent}15;border:1px solid ${project.accent}25;display:flex;align-items:center;justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="${project.accent}" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div><div style="font-size:10px;color:#6B7280;font-family:monospace">${project.name}</div>`;
-                        parent.appendChild(fallback);
-                      }
-                    }}
-                  />
-                  {/* Glass Dark Overlay */}
-                  <div className="browser-overlay" />
-                  
-                  {/* Center "🚀 Live Preview" text overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-20">
-                    <div className="px-5 py-2.5 rounded-full bg-white text-[#050505] font-extrabold text-xs flex items-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 shadow-[0_8px_32px_rgba(255,255,255,0.25)]">
-                      <span>🚀 Live Preview</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Info & Details Section */}
-                <div className="p-6 flex flex-col flex-grow text-left bg-[#0B0B0B] border-t border-white/5">
-                  <div className="flex items-center justify-between mb-4">
-                    <div
-                      className="flex items-center gap-2 text-[10px] font-mono font-bold tracking-wider uppercase"
-                      style={{ color: project.accent, opacity: 0.85 }}
-                    >
-                      {project.icon}
-                      <span>{t(`portfolio.filters.${project.categoryKey}`)}</span>
-                    </div>
-                    {project.loginRequired ? (
-                      <span className="px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[9px] font-bold text-amber-400 flex items-center gap-1 shadow-[0_0_12px_rgba(245,158,11,0.05)]">
-                        <span>🔒 {t('portfolio.login_required')}</span>
-                      </span>
-                    ) : (
-                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[9px] font-bold text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.05)]">
-                        Active
-                      </span>
-                    )}
-                  </div>
-
-                  <h3 className="text-base font-heading font-extrabold text-white mb-2.5 group-hover:text-[#22D3EE] transition-colors duration-300">
-                    {project.name}
-                  </h3>
-                  
-                  <p className="text-[#B5B5B5] text-xs leading-relaxed mb-5 flex-grow font-sans">
-                    {t(`portfolio.projects.${project.id.replace(/-/g, '_')}.desc`)}
-                  </p>
-
-                  {/* Tech badging */}
-                  <div className="flex flex-wrap gap-1.5 mb-6">
-                    {project.technologies.map((tech) => (
-                      <span
-                        key={tech}
-                        className="px-2 py-0.5 rounded bg-white/3 border border-white/8 text-[9px] font-mono text-[#B5B5B5]"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="w-full py-2.5 rounded-xl border border-white/10 group-hover:border-[#22D3EE]/30 group-hover:bg-[#22D3EE]/5 text-xs font-semibold text-white group-hover:text-[#22D3EE] flex items-center justify-center gap-2 transition-all duration-300">
-                    <span>{t('portfolio.cta_live')}</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-300" />
-                  </div>
-                </div>
-              </motion.a>
+                <ProjectCard
+                  project={project}
+                  index={index}
+                  t={t}
+                  isDimmed={hoveredIndex !== null && hoveredIndex !== index}
+                  onHoverStart={() => setHoveredIndex(index)}
+                  onHoverEnd={() => setHoveredIndex(null)}
+                  isInView={isInView}
+                />
+              </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>

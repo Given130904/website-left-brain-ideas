@@ -238,67 +238,53 @@ html.lenis, html.lenis body { height: auto; }
   position: relative;
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
-  background: #0B0B0B;
+  border-radius: 20px;
+  background: rgba(10, 10, 10, 0.4);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
               box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+              border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              background 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
 }
 
-.browser-bar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 16px;
-  background: #111111;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  flex-shrink: 0;
-  user-select: none;
+.browser-mockup:hover {
+  border-color: rgba(34, 211, 238, 0.25);
+  box-shadow: 0 20px 40px -15px rgba(34, 211, 238, 0.15),
+              0 0 30px -5px rgba(34, 211, 238, 0.2);
+  background: rgba(15, 23, 42, 0.5);
 }
-
-.browser-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-}
-.browser-dot.red { background: #FF5F56; }
-.browser-dot.yellow { background: #FFBD2E; }
-.browser-dot.green { background: #27C93F; }
 
 .browser-preview {
   position: relative;
-  height: 220px; /* premium card crop height */
   width: 100%;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   background: #050505;
 }
 
 .browser-screenshot {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: auto;
-  display: block;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
   will-change: transform;
-  transform: translateY(0);
+  transform: scale(1);
   transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .browser-mockup:hover .browser-screenshot {
-  transform: translateY(calc(-100% + 220px));
-  transition: transform 5.5s cubic-bezier(0.215, 0.610, 0.355, 1);
+  transform: scale(1.05);
 }
 
 /* Dark gradient overlay on hover */
 .browser-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 5, 5, 0.2) 0%, rgba(5, 5, 5, 0.7) 100%);
+  background: linear-gradient(180deg, rgba(5, 5, 5, 0.1) 0%, rgba(5, 5, 5, 0.6) 100%);
   opacity: 0;
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
@@ -312,6 +298,30 @@ html.lenis, html.lenis body { height: auto; }
 /* Global background transparency for sections to display the 3D canvas */
 section {
   background-color: transparent !important;
+}
+
+/* Premium Rotating Gradient Border Animation */
+.animate-spin-border {
+  animation: spin-border 4s linear infinite;
+}
+
+@keyframes spin-border {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Neon Scan divider scanning keyframes */
+@keyframes scan-line-h {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+@keyframes scan-line-v {
+  0% { top: -100%; }
+  100% { top: 200%; }
 }
 
 

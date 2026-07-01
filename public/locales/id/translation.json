@@ -25,13 +25,29 @@
     "benefit4_desc": "Kami membantu mulai dari perencanaan hingga website siap digunakan dan bisa diakses pelanggan."
   },
   "about": {
-    "badge": "Tentang Kami"
+    "badge": "Tentang Kami",
+    "heading1": "Mengapa Memilih",
+    "heading2": "Left Brain Ideas?",
+    "left_brain_title": "The Left Brain (Logika)",
+    "left_brain_text": "Mewakili struktur sistem terarah, rekayasa backend yang aman, kecepatan akses tinggi, dan perlindungan database dari serangan siber.",
+    "ideas_title": "The Ideas Core (Kreativitas)",
+    "ideas_text": "Mewakili kenyamanan tampilan pengguna (UX), desain antarmuka kaca (glassmorphism), identitas brand modern, dan keindahan responsif.",
+    "synergy_title": "Sinergi yang Menghasilkan Solusi",
+    "synergy_text": "Gabungan logika matang dan kreativitas desain melahirkan website kelas dunia yang loading instan, aman, dan memikat pelanggan sejak detik pertama.",
+    "stats": {
+      "projects_value": "15",
+      "projects_label": "Website Selesai",
+      "speed_value": "99",
+      "speed_label": "Skor Kecepatan",
+      "satisfaction_value": "100",
+      "satisfaction_label": "Kepuasan Klien"
+    }
   },
   "philosophy": {
-    "badge": "Filosofi Kami",
-    "heading1": "Filosofi di Balik",
-    "heading2": "Left Brain Ideas",
-    "description": "Left Brain Ideas lahir dari keyakinan bahwa website terbaik tidak hanya mengandalkan logika yang kuat atau desain yang cantik saja, melainkan gabungan harmonis dari keduanya. Kami menyatukan presisi sistem rekayasa dengan keindahan visual yang memukau untuk membantu bisnis Anda tumbuh lebih cepat.",
+    "badge": "Pendekatan Kami",
+    "heading1": "Cara Kami Membangun Website",
+    "heading2": "yang Memberikan Hasil",
+    "description": "Kami percaya website dengan angka penjualan tinggi membutuhkan logika teknis yang kuat serta desain visual yang menakjubkan. Kami memadukan rekayasa presisi dengan keindahan rapi untuk memperkuat kredibilitas bisnis Anda secara online.",
     "cards": {
       "structured": {
         "title": "Berpikir Terstruktur",
@@ -95,6 +111,7 @@
     "sub": "Pilihan website berkualitas yang telah kami rancang dan kembangkan.",
     "cta": "Lihat Detail Proyek",
     "cta_live": "Live Demo",
+    "cta_try": "🚀 Coba Website",
     "login_required": "Login Required",
     "filters": {
       "all": "Semua",
@@ -141,9 +158,14 @@
         "desc": "Sistem manajemen sumber daya manusia yang aman untuk melacak kehadiran karyawan, analisis penggajian, dan evaluasi kinerja."
       },
       "gudangin_stok": {
-        "name": "Gudangin Stok",
-        "category": "Inventory Management",
+        "name": "Sistem Inventaris",
+        "category": "Sistem Inventaris",
         "desc": "Alat manajemen inventaris gudang untuk memantau stok masuk, keluar, dan peringatan stok menipis secara real-time."
+      },
+      "weather_dashboard": {
+        "name": "Dashboard Cuaca",
+        "category": "Dashboard",
+        "desc": "Dashboard cuaca modern dengan cuaca real-time, AQI, Indeks UV, dan prakiraan cuaca 7 hari."
       }
     }
   },
@@ -185,30 +207,66 @@
       }
     }
   },
+  "why_choose": {
+    "badge": "Keunggulan Kami",
+    "heading": "Mengapa Klien Memilih Left Brain Ideas",
+    "sub": "Kami membantu UMKM, Startup, Personal Brand, dan Perusahaan berkembang dengan rekayasa sistem yang solid dan desain visual yang menakjubkan.",
+    "cards": {
+      "consultation": {
+        "title": "Konsultasi Gratis",
+        "desc": "Kami membantu klien menemukan solusi terbaik sebelum memulai proyek."
+      },
+      "design": {
+        "title": "Desain Premium",
+        "desc": "Antarmuka modern, bersih, dan ramah pengguna."
+      },
+      "development": {
+        "title": "Pengembangan Cepat",
+        "desc": "Alur kerja yang efisien dengan pembaruan kemajuan yang jelas."
+      },
+      "security": {
+        "title": "Website Aman",
+        "desc": "Dibangun dengan mengutamakan performa dan keamanan."
+      },
+      "responsive": {
+        "title": "Sepenuhnya Responsif",
+        "desc": "Tampilan sempurna di ponsel, tablet, dan desktop."
+      },
+      "support": {
+        "title": "Dukungan Ramah",
+        "desc": "Komunikasi yang mudah sebelum, selama, dan setelah proyek selesai."
+      }
+    }
+  },
   "process": {
-    "badge": "Cara Kami Bekerja",
-    "heading": "Proses Pembuatan Website",
+    "badge": "Pendekatan Kami",
+    "heading": "Proses Kerja yang Mudah, Transparan, dan Terarah",
     "sub": "Kami bekerja dalam fase terstruktur untuk menjamin keindahan desain dan keandalan sistem.",
     "steps": {
       "step1": {
         "title": "Konsultasi",
-        "desc": "Kami mendengar ide dan visi bisnis Anda, mendiskusikan kebutuhan teknis, serta menyusun strategi digital yang tepat sasaran secara gratis."
+        "desc": "Kami mendengar ide dan visi bisnis Anda, mendiskusikan kebutuhan teknis, serta menyusun strategi digital yang tepat sasaran secara gratis.",
+        "duration": "1 Hari"
       },
       "step2": {
         "title": "Desain",
-        "desc": "Merancang visual website yang modern, elegan, dan nyaman dipandang agar sesuai dengan identitas bisnis Anda serta memikat calon pembeli."
+        "desc": "Merancang visual website yang modern, elegan, dan nyaman dipandang agar sesuai dengan identitas bisnis Anda serta memikat calon pembeli.",
+        "duration": "3-5 Hari"
       },
       "step3": {
         "title": "Pengembangan Website",
-        "desc": "Mengubah desain menjadi website nyata dengan kode bersih. Menghasilkan performa loading cepat, responsif, dan lancar dibuka dari handphone."
+        "desc": "Mengubah desain menjadi website nyata dengan kode bersih. Menghasilkan performa loading cepat, responsif, dan lancar dibuka dari handphone.",
+        "duration": "1-2 Minggu"
       },
       "step4": {
         "title": "Keamanan & Pengujian",
-        "desc": "Melakukan uji coba menyeluruh di berbagai HP dan browser, serta menerapkan sistem keamanan ketat agar website bebas dari gangguan hacker."
+        "desc": "Melakukan uji coba menyeluruh di berbagai HP dan browser, serta menerapkan sistem keamanan ketat agar website bebas dari gangguan hacker.",
+        "duration": "2-3 Hari"
       },
       "step5": {
         "title": "Launching & Pendampingan",
-        "desc": "Website Anda resmi diluncurkan online. Kami siap mendampingi Anda untuk mengelola domain, hosting, dan melakukan pemeliharaan rutin."
+        "desc": "Website Anda resmi diluncurkan online. Kami siap mendampingi Anda untuk mengelola domain, hosting, dan melakukan pemeliharaan rutin.",
+        "duration": "1 Hari"
       }
     }
   },
@@ -327,8 +385,8 @@
     "success_title": "Pesan Terkirim!",
     "success_sub": "Hubungi admin kami langsung untuk respon lebih cepat.",
     "send_another": "Pesan Lain",
-    "response_label": "Respon Cepat",
-    "response_value": "Rata-rata < 10 menit",
+    "response_label": "⚡ Respon Cepat & Waktu Respon",
+    "response_value": "Rata-rata Balasan 10–30 Menit (Pada Jam Operasional)",
     "cta_main": "Mulai Konsultasi Gratis Sekarang",
     "cta_sub": "Tidak perlu registrasi · Langsung terhubung via WhatsApp",
     "admin1_role": "Sales & Konsultasi",
@@ -348,7 +406,7 @@
     "hours_title": "Jam Operasional",
     "hours_value": "Senin–Sabtu · 09:00–21:00 WIB",
     "response_title": "Waktu Respon",
-    "response_value": "±5 Menit (Fast Response)",
+    "response_value": "Rata-rata Balasan 10–30 Menit",
     "privacy": "Kebijakan Privasi",
     "terms": "Syarat Ketentuan",
     "copyright_text": "Hak Cipta Dilindungi Undang-Undang."

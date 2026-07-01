@@ -463,6 +463,14 @@ export default function HeroSection() {
               </span>
             </motion.h1>
 
+            {/* Underline animating from left to right */}
+            <motion.div 
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.9, delay: 0.28, ease: EASE }}
+              className="w-20 h-[2px] bg-[#22D3EE] mt-4 mb-7 rounded-full origin-left"
+            />
+
             {/* Subheadline */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -478,21 +486,23 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
-              className="flex flex-wrap gap-4 mb-10"
+              className="flex flex-wrap items-center gap-4 mb-10"
             >
-              {/* Primary CTA */}
+              {/* Primary CTA with Animated Gradient Border */}
               <motion.button
                 onClick={() => window.dispatchEvent(new CustomEvent('open-whatsapp-modal'))}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold text-[#050505] cursor-pointer"
-                style={{
-                  background: '#22D3EE',
-                  boxShadow: '0 0 20px rgba(34,211,238,0.25)',
-                }}
+                className="relative group/btn p-[1.5px] rounded-xl overflow-hidden cursor-pointer"
               >
-                {t('hero.cta_primary')}
-                <ArrowRight className="w-4 h-4" />
+                {/* Glowing gradient background borders */}
+                <div className="absolute inset-[-100%] bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 opacity-80 group-hover/btn:opacity-100 transition-opacity duration-300 animate-spin-border" />
+                
+                {/* Inner button container */}
+                <div className="relative flex items-center justify-center gap-2 px-6 py-3.5 rounded-[11px] bg-[#050505] text-white text-sm font-bold transition-colors duration-300 group-hover/btn:bg-[#050505]/95">
+                  {t('hero.cta_primary')}
+                  <ArrowRight className="w-4 h-4 text-cyan-400" />
+                </div>
               </motion.button>
 
               {/* Secondary CTA */}
