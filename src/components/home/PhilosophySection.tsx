@@ -1,10 +1,40 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useInView } from 'framer-motion';
 import { Cpu, Sparkles, HeartHandshake } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Badge from '../ui/Badge';
 
 const EASE = [0.16, 1, 0.3, 1] as any;
+
+const cardsData = [
+  {
+    key: 'structured',
+    number: '01',
+    icon: <Cpu className="w-5 h-5 text-cyan-400" />,
+    glowColor: 'rgba(34, 211, 238, 0.05)',
+    glowBorderColor: 'rgba(34, 211, 238, 0.25)',
+    idleAnimation: { scale: [1, 1.08, 1] },
+    hoverAnimation: { rotate: 360, scale: 1.15 }
+  },
+  {
+    key: 'intuitive',
+    number: '02',
+    icon: <Sparkles className="w-5 h-5 text-pink-400" />,
+    glowColor: 'rgba(236, 72, 153, 0.05)',
+    glowBorderColor: 'rgba(236, 72, 153, 0.25)',
+    idleAnimation: { y: [0, -3, 0] },
+    hoverAnimation: { scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }
+  },
+  {
+    key: 'support',
+    number: '03',
+    icon: <HeartHandshake className="w-5 h-5 text-emerald-400" />,
+    glowColor: 'rgba(16, 185, 129, 0.05)',
+    glowBorderColor: 'rgba(16, 185, 129, 0.25)',
+    idleAnimation: { scale: [1, 1.05, 1, 1.05, 1] },
+    hoverAnimation: { rotate: [-8, 8, -8] }
+  }
+];
 
 interface PhilosophyCardProps {
   card: any;
@@ -16,7 +46,6 @@ interface PhilosophyCardProps {
 // 3D Parallax Tilt Card Component
 function PhilosophyCard({ card, index, t, isInView }: PhilosophyCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
 
   // Mouse coords mapped to spring-damped 3D tilt angles (subtle max 6 degrees)
   const x = useMotionValue(0);
@@ -37,11 +66,6 @@ function PhilosophyCard({ card, index, t, isInView }: PhilosophyCardProps) {
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
-    setIsHovered(false);
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
   };
 
   const cardVariants = {
@@ -55,6 +79,10 @@ function PhilosophyCard({ card, index, t, isInView }: PhilosophyCardProps) {
         ease: EASE,
       },
     },
+    hover: {
+      y: -10,
+      transition: { duration: 0.3, ease: EASE }
+    }
   };
 
   return (
@@ -62,26 +90,18 @@ function PhilosophyCard({ card, index, t, isInView }: PhilosophyCardProps) {
       ref={cardRef}
       variants={cardVariants}
       onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
         rotateX,
         rotateY,
         transformStyle: 'preserve-3d',
-        willChange: 'transform, opacity',
       }}
       // Idle float animation (pauses when hovered or out of viewport)
-      animate={
-        isHovered 
-          ? { y: -10 } 
-          : isInView 
-            ? { y: [0, -6, 0] } 
-            : { y: 0 }
-      }
+      animate={isInView ? { y: [0, -6, 0] } : { y: 0 }}
+      whileHover="hover"
       transition={
-        isHovered 
-          ? { duration: 0.3, ease: EASE } 
-          : {
+        isInView 
+          ? {
               y: {
                 repeat: Infinity,
                 duration: 6,
@@ -89,32 +109,31 @@ function PhilosophyCard({ card, index, t, isInView }: PhilosophyCardProps) {
                 delay: index * 0.3,
               }
             }
+          : {}
       }
       className="relative flex-1 w-full max-w-[340px] rounded-[24px] bg-neutral-900/40 backdrop-blur-xl border border-white/8 p-8 transition-colors duration-300 select-none group"
     >
       {/* High-performance glowing shadow backdrop element (only animates opacity) */}
       <div 
-        className="absolute inset-0 rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none -z-10 blur-2xl"
+        className="absolute inset-0 rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none -z-10 bg-[radial-gradient(circle,var(--glow-color)_0%,transparent_70%)]"
         style={{ 
-          backgroundColor: card.glowColor,
-          boxShadow: `0 0 45px -5px ${card.glowColor}`,
-          willChange: 'opacity'
-        }}
+          '--glow-color': card.glowColor,
+          boxShadow: `0 0 45px -5px var(--glow-color)`,
+        } as any}
       />
       
       {/* High-performance border glow element (only animates opacity) */}
       <div 
-        className="absolute inset-0 rounded-[24px] border opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+        className="absolute inset-0 rounded-[24px] border border-transparent opacity-0 group-hover:opacity-100 group-hover:border-[var(--glow-border)] transition-all duration-500 pointer-events-none"
         style={{ 
-          borderColor: card.glowBorderColor,
-          willChange: 'opacity'
-        }}
+          '--glow-border': card.glowBorderColor,
+        } as any}
       />
 
       {/* Floating background huge index number */}
       <div 
         className="absolute top-6 right-8 text-7xl font-heading font-black text-white/[0.02] select-none transition-colors duration-500 group-hover:text-cyan-400/5"
-        style={{ transform: 'translateZ(10px)', willChange: 'transform' }}
+        style={{ transform: 'translateZ(10px)' }}
       >
         {card.number}
       </div>
@@ -122,10 +141,13 @@ function PhilosophyCard({ card, index, t, isInView }: PhilosophyCardProps) {
       {/* Icon box with animated inner icon */}
       <div 
         className="w-12 h-12 rounded-xl bg-white/3 border border-white/5 flex items-center justify-center shrink-0 mb-8 group-hover:bg-white/5 group-hover:border-white/10 transition-all duration-300"
-        style={{ transform: 'translateZ(15px)', willChange: 'transform' }}
+        style={{ transform: 'translateZ(15px)' }}
       >
         <motion.div
-          animate={isHovered ? card.hoverAnimation : card.idleAnimation}
+          variants={{
+            hover: card.hoverAnimation
+          }}
+          animate={card.idleAnimation}
           transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
         >
           {card.icon}
@@ -133,7 +155,7 @@ function PhilosophyCard({ card, index, t, isInView }: PhilosophyCardProps) {
       </div>
 
       {/* Content details */}
-      <div style={{ transform: 'translateZ(20px)', willChange: 'transform' }}>
+      <div style={{ transform: 'translateZ(20px)' }}>
         <h3 className="text-lg font-heading font-extrabold text-white mb-3 group-hover:text-[#22D3EE] transition-colors duration-300">
           {t(`philosophy.cards.${card.key}.title`)}
         </h3>
@@ -151,36 +173,6 @@ export default function PhilosophySection() {
   // Section reference to pause off-screen animations
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { margin: '-50px' });
-
-  const cardsData = [
-    {
-      key: 'structured',
-      number: '01',
-      icon: <Cpu className="w-5 h-5 text-cyan-400" />,
-      glowColor: 'rgba(34, 211, 238, 0.05)',
-      glowBorderColor: 'rgba(34, 211, 238, 0.25)',
-      idleAnimation: { scale: [1, 1.08, 1] },
-      hoverAnimation: { rotate: 360, scale: 1.15 }
-    },
-    {
-      key: 'intuitive',
-      number: '02',
-      icon: <Sparkles className="w-5 h-5 text-pink-400" />,
-      glowColor: 'rgba(236, 72, 153, 0.05)',
-      glowBorderColor: 'rgba(236, 72, 153, 0.25)',
-      idleAnimation: { y: [0, -3, 0] },
-      hoverAnimation: { scale: [1, 1.2, 1], rotate: [0, 15, -15, 0] }
-    },
-    {
-      key: 'support',
-      number: '03',
-      icon: <HeartHandshake className="w-5 h-5 text-emerald-400" />,
-      glowColor: 'rgba(16, 185, 129, 0.05)',
-      glowBorderColor: 'rgba(16, 185, 129, 0.25)',
-      idleAnimation: { scale: [1, 1.05, 1, 1.05, 1] },
-      hoverAnimation: { rotate: [-8, 8, -8] }
-    }
-  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -224,15 +216,14 @@ export default function PhilosophySection() {
         }
       `}</style>
 
-      {/* Background glow effects */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,transparent_70%)] filter blur-[120px] pointer-events-none -z-10 animate-pulse-glow" />
-      <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.01)_0%,transparent_70%)] filter blur-[100px] pointer-events-none -z-10" />
+      {/* Background glow effects — static opacity */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full pointer-events-none -z-10 opacity-60" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.04) 0%, rgba(34,211,238,0.01) 40%, transparent 70%)' }} />
 
-      {/* Floating particles background (pauses when section is offscreen) */}
+      {/* Floating particles background (viewport gated) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className={`absolute top-[20%] left-[25%] w-2 h-2 rounded-full bg-cyan-400/30 filter blur-xs ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '8s', animationDelay: '0s' }} />
-        <div className={`absolute top-[50%] right-[20%] w-3 h-3 rounded-full bg-blue-400/25 filter blur-[1px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '11s', animationDelay: '2s' }} />
-        <div className={`absolute bottom-[25%] left-[15%] w-1.5 h-1.5 rounded-full bg-[#22D3EE]/40 filter blur-none ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '7s', animationDelay: '1s' }} />
+        <div className={`absolute top-[20%] left-[25%] w-2 h-2 rounded-full bg-cyan-400/25 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '8s', animationDelay: '0s' }} />
+        <div className={`absolute top-[50%] right-[20%] w-3 h-3 rounded-full bg-blue-400/20 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '11s', animationDelay: '2s' }} />
+        <div className={`absolute bottom-[25%] left-[15%] w-1.5 h-1.5 rounded-full bg-[#22D3EE]/30 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '7s', animationDelay: '1s' }} />
         <div className={`absolute bottom-[15%] right-[30%] w-4 h-4 rounded-full bg-purple-500/15 filter blur-[2px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '14s', animationDelay: '3.5s' }} />
       </div>
 
@@ -285,14 +276,12 @@ export default function PhilosophySection() {
                   <div className="hidden lg:block w-12 xl:w-20 h-[1px] bg-white/10 relative overflow-hidden">
                     <div 
                       className={`bg-gradient-to-r from-transparent via-[#22D3EE] to-transparent ${isInView ? 'animate-scan-h' : 'absolute left-[-100%]'}`} 
-                      style={{ willChange: 'left' }}
                     />
                   </div>
                   {/* Vertical Connector for mobile */}
                   <div className="lg:hidden w-[1px] h-10 bg-white/10 relative overflow-hidden">
                     <div 
                       className={`bg-gradient-to-b from-transparent via-[#22D3EE] to-transparent ${isInView ? 'animate-scan-v' : 'absolute top-[-100%]'}`} 
-                      style={{ willChange: 'top' }}
                     />
                   </div>
                 </div>

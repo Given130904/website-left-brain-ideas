@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { Plus, Minus } from 'lucide-react';
@@ -16,7 +16,7 @@ interface FaqCardProps {
   index: number;
 }
 
-function FaqCard({ faq, isOpen, onToggle, index }: FaqCardProps) {
+const FaqCard = memo(function FaqCard({ faq, isOpen, onToggle, index }: FaqCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -117,7 +117,7 @@ function FaqCard({ faq, isOpen, onToggle, index }: FaqCardProps) {
       </div>
     </motion.div>
   );
-}
+});
 
 export default function FaqSection() {
   const { t } = useTranslation();
@@ -125,7 +125,7 @@ export default function FaqSection() {
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-80px' });
 
-  const faqs: FaqItem[] = [
+  const faqs: FaqItem[] = useMemo(() => [
     {
       id: 'timeline',
       question: t('faq.items.timeline.q'),
@@ -151,11 +151,11 @@ export default function FaqSection() {
       question: t('faq.items.maintenance.q'),
       answer: t('faq.items.maintenance.a'),
     },
-  ];
+  ], [t]);
 
-  const toggle = (id: string) => {
+  const toggle = useCallback((id: string) => {
     setOpenId((prev) => (prev === id ? null : id));
-  };
+  }, []);
 
   return (
     <section
@@ -165,8 +165,8 @@ export default function FaqSection() {
     >
       {/* Ambient background radials */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(34,211,238,0.02)_0%,transparent_70%)] blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.01)_0%,transparent_70%)] blur-3xl" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[radial-gradient(ellipse,rgba(34,211,238,0.02)_0%,rgba(34,211,238,0.005)_40%,transparent_70%)]" />
+        <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-[radial-gradient(ellipse,rgba(255,255,255,0.01)_0%,transparent_70%)]" />
       </div>
 
       <div className="container relative z-10">

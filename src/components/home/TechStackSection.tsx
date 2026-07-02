@@ -1,11 +1,82 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Badge from '../ui/Badge';
 
+interface TechCardProps {
+  tech: {
+    name: string;
+    category: string;
+    color: string;
+    svg: React.ReactNode;
+  };
+  idx: number;
+  getCategoryColor: (cat: string) => string;
+}
+
+const TechCard = memo(function TechCard({ tech, idx, getCategoryColor }: TechCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.5, delay: idx * 0.04, ease: [0.16, 1, 0.3, 1] as any }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      className="relative group cursor-default"
+    >
+      <motion.div
+        className="flex flex-col items-center gap-3 p-4 rounded-2xl border bg-[#0B0B0B]"
+        animate={{
+          borderColor: isHovered
+            ? `${tech.color}55`
+            : 'rgba(255,255,255,0.06)',
+          boxShadow: isHovered
+            ? `0 0 20px ${tech.color}20, 0 8px 32px rgba(0,0,0,0.4)`
+            : '0 2px 8px rgba(0,0,0,0.2)',
+          y: isHovered ? -4 : 0,
+          scale: isHovered ? 1.03 : 1,
+        }}
+        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+        style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+      >
+        {/* Icon */}
+        <div
+          className="w-14 h-14 flex items-center justify-center rounded-xl p-2 transition-all duration-300"
+          style={{
+            background: isHovered
+              ? `${tech.color}12`
+              : 'rgba(255,255,255,0.03)',
+          }}
+        >
+          {tech.svg}
+        </div>
+
+        {/* Name */}
+        <span className="text-xs font-semibold text-white text-center leading-tight">
+          {tech.name}
+        </span>
+
+        {/* Category badge */}
+        <span
+          className="text-[9px] font-medium px-2 py-0.5 rounded-full"
+          style={{
+            color: getCategoryColor(tech.category),
+            background: `${getCategoryColor(tech.category)}12`,
+            border: `1px solid ${getCategoryColor(tech.category)}22`,
+          }}
+        >
+          {tech.category}
+        </span>
+      </motion.div>
+    </motion.div>
+  );
+});
+
 export default function TechStackSection() {
   const { t } = useTranslation();
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   const scrollProps = {
     initial: { opacity: 0, y: 30 },
@@ -231,7 +302,7 @@ export default function TechStackSection() {
       className="py-28 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
       {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,transparent_100%)] filter blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,rgba(34,211,238,0.005)_40%,transparent_70%)] pointer-events-none" />
 
       <div className="container relative z-10">
 
@@ -250,64 +321,15 @@ export default function TechStackSection() {
           </motion.h2>
         </div>
 
-        {/* Tech Cards Grid */}
+        {/* Tech Cards Grid using isolated TechCard subcomponents */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           {techStack.map((tech, idx) => (
-            <motion.div
+            <TechCard
               key={tech.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.5, delay: idx * 0.04, ease: [0.16, 1, 0.3, 1] as any }}
-              onHoverStart={() => setHoveredCard(tech.name)}
-              onHoverEnd={() => setHoveredCard(null)}
-              className="relative group cursor-default"
-            >
-              <motion.div
-                className="flex flex-col items-center gap-3 p-4 rounded-2xl border bg-[#0B0B0B]"
-                animate={{
-                  borderColor: hoveredCard === tech.name
-                    ? `${tech.color}55`
-                    : 'rgba(255,255,255,0.06)',
-                  boxShadow: hoveredCard === tech.name
-                    ? `0 0 20px ${tech.color}20, 0 8px 32px rgba(0,0,0,0.4)`
-                    : '0 2px 8px rgba(0,0,0,0.2)',
-                  y: hoveredCard === tech.name ? -4 : 0,
-                  scale: hoveredCard === tech.name ? 1.03 : 1,
-                }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-              >
-                {/* Icon */}
-                <div
-                  className="w-14 h-14 flex items-center justify-center rounded-xl p-2 transition-all duration-300"
-                  style={{
-                    background: hoveredCard === tech.name
-                      ? `${tech.color}12`
-                      : 'rgba(255,255,255,0.03)',
-                  }}
-                >
-                  {tech.svg}
-                </div>
-
-                {/* Name */}
-                <span className="text-xs font-semibold text-white text-center leading-tight">
-                  {tech.name}
-                </span>
-
-                {/* Category badge */}
-                <span
-                  className="text-[9px] font-medium px-2 py-0.5 rounded-full"
-                  style={{
-                    color: getCategoryColor(tech.category),
-                    background: `${getCategoryColor(tech.category)}12`,
-                    border: `1px solid ${getCategoryColor(tech.category)}22`,
-                  }}
-                >
-                  {tech.category}
-                </span>
-              </motion.div>
-            </motion.div>
+              tech={tech}
+              idx={idx}
+              getCategoryColor={getCategoryColor}
+            />
           ))}
         </div>
 

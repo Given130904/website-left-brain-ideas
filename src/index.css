@@ -26,28 +26,25 @@
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* ─── Animations ──────────────────────────────────────── */
-  --animate-float:      float 6s ease-in-out infinite;
-  --animate-float-logo: float-logo 5s ease-in-out infinite;
-  --animate-pulse-glow: pulse-glow 3s ease-in-out infinite alternate;
+  /* ─── Animations — only transform/opacity ─────────────── */
+  --animate-float:      float 7s ease-in-out infinite;
+  --animate-float-logo: float-logo 6s ease-in-out infinite;
   --animate-shimmer:    shimmer 2.5s linear infinite;
   --animate-spin-slow:  spin-slow 20s linear infinite;
 
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
-    50%       { transform: translateY(-12px); }
+    50%       { transform: translateY(-10px); }
   }
 
   @keyframes float-logo {
     0%, 100% { transform: translateY(0px) rotate(0deg); }
-    33%       { transform: translateY(-14px) rotate(0.5deg); }
-    66%       { transform: translateY(-6px) rotate(-0.5deg); }
+    33%       { transform: translateY(-12px) rotate(0.4deg); }
+    66%       { transform: translateY(-5px) rotate(-0.4deg); }
   }
 
-  @keyframes pulse-glow {
-    0%   { opacity: 0.25; box-shadow: 0 0 20px rgba(56,189,248,0.1); }
-    100% { opacity: 0.7;  box-shadow: 0 0 40px rgba(56,189,248,0.3); }
-  }
+  /* pulse-glow removed — was animating box-shadow (expensive paint) */
+  /* Instead use static opacity on background blobs */
 
   @keyframes shimmer {
     0%   { background-position: -200% center; }
@@ -60,13 +57,12 @@
   }
 
   @keyframes gradient-orbit {
-    0%   { transform: rotate(0deg)   scale(1); }
-    50%  { transform: rotate(180deg) scale(1.1); }
-    100% { transform: rotate(360deg) scale(1); }
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(24px); }
+    from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 }
@@ -87,38 +83,46 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Isolate stacking context for compositing */
+    isolation: isolate;
+    /* Prevent horizontal scroll from absolutelypositioned elements */
+    position: relative;
   }
 
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0.02;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  html {
+    overflow-x: hidden;
   }
+
+  /* Noise texture removed — SVG filter on fixed pseudo-element is expensive */
 
   /* Scrollbar */
-  ::-webkit-scrollbar       { width: 6px; height: 6px; }
+  ::-webkit-scrollbar       { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: var(--color-bg-primary); }
   ::-webkit-scrollbar-thumb {
     background: #1F1F1F;
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.03);
   }
   ::-webkit-scrollbar-thumb:hover { background: #2D2D2D; }
 
   /* Selection */
   ::selection {
-    background: rgba(56, 189, 248, 0.2);
+    background: rgba(34, 211, 238, 0.2);
     color: #fff;
   }
 
-  /* Focus visible */
+  /* Focus visible — strong and accessible */
   :focus-visible {
-    outline: 2px solid rgba(56, 189, 248, 0.6);
-    outline-offset: 2px;
+    outline: 2px solid rgba(34, 211, 238, 0.7);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Minimum touch target 44×44px on mobile */
+  @media (max-width: 768px) {
+    button, a[role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 }
 
@@ -128,25 +132,50 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 24px;
+  /* Prevent children from causing horizontal scroll */
+  overflow-x: clip;
 }
 
 @media (max-width: 640px) {
   .container { padding: 0 16px; }
 }
 
+@media (max-width: 380px) {
+  .container { padding: 0 12px; }
+}
+
 /* ─── Glass Utility ───────────────────────────────────────── */
 .glass {
   background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .glass-bright {
   background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(56, 189, 248, 0.1);
+}
+
+/* Reduce blur on mobile for performance */
+@media (max-width: 768px) {
+  .glass {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(15, 23, 42, 0.95) !important;
+  }
+  .glass-bright {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(30, 41, 59, 0.95) !important;
+  }
+  .browser-mockup {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(10, 10, 10, 0.95) !important;
+  }
 }
 
 /* ─── Text Gradient ───────────────────────────────────────── */
@@ -164,26 +193,26 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* ─── Glow Effects ────────────────────────────────────────── */
+/* ─── Glow Effects — static only, not animated ──────────── */
 .glow-sky {
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.25),
-              0 0 60px rgba(56, 189, 248, 0.1);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.2),
+              0 0 50px rgba(56, 189, 248, 0.08);
 }
 
 .glow-cyan {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.25),
-              0 0 60px rgba(6, 182, 212, 0.1);
+  box-shadow: 0 0 18px rgba(6, 182, 212, 0.2),
+              0 0 50px rgba(6, 182, 212, 0.08);
 }
 
 .glow-white {
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.15),
-              0 0 80px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.12),
+              0 0 60px rgba(255, 255, 255, 0.04);
 }
 
 /* ─── Logo Glow (for Hero) ────────────────────────────────── */
 .logo-glow {
-  filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.3))
-          drop-shadow(0 0 60px rgba(56, 189, 248, 0.1));
+  filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.25))
+          drop-shadow(0 0 40px rgba(56, 189, 248, 0.08));
 }
 
 /* ─── Section Divider ─────────────────────────────────────── */
@@ -216,11 +245,6 @@ html.lenis, html.lenis body { height: auto; }
 
 .lenis.lenis-scrolling iframe { pointer-events: none; }
 
-/* ─── Animated Gradient Orbit (Hero bg) ──────────────────── */
-.orbit-gradient {
-  animation: gradient-orbit 12s ease-in-out infinite;
-}
-
 /* ─── Shimmer Loading State ───────────────────────────────── */
 .shimmer {
   background: linear-gradient(
@@ -233,29 +257,23 @@ html.lenis, html.lenis body { height: auto; }
   animation: shimmer 2s linear infinite;
 }
 
-/* ─── Browser Mockup & Scrolling ──────────────────────── */
+/* ─── Browser Mockup ──────────────────────────────────────── */
 .browser-mockup {
   position: relative;
   display: flex;
   flex-direction: column;
   border-radius: 20px;
   background: rgba(10, 10, 10, 0.4);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-              border-color 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform;
+  /* Only transition transform/opacity — no box-shadow transition */
+  transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .browser-mockup:hover {
   border-color: rgba(34, 211, 238, 0.25);
-  box-shadow: 0 20px 40px -15px rgba(34, 211, 238, 0.15),
-              0 0 30px -5px rgba(34, 211, 238, 0.2);
-  background: rgba(15, 23, 42, 0.5);
 }
 
 .browser-preview {
@@ -271,22 +289,20 @@ html.lenis, html.lenis body { height: auto; }
   height: 100%;
   object-fit: cover;
   object-position: top;
-  will-change: transform;
   transform: scale(1);
-  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 1.0s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .browser-mockup:hover .browser-screenshot {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
-/* Dark gradient overlay on hover */
 .browser-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 5, 5, 0.1) 0%, rgba(5, 5, 5, 0.6) 100%);
+  background: linear-gradient(180deg, rgba(5, 5, 5, 0.1) 0%, rgba(5, 5, 5, 0.55) 100%);
   opacity: 0;
-  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   z-index: 10;
 }
@@ -300,28 +316,135 @@ section {
   background-color: transparent !important;
 }
 
-/* Premium Rotating Gradient Border Animation */
+/* ─── Premium Rotating Gradient Border ────────────────────── */
 .animate-spin-border {
   animation: spin-border 4s linear infinite;
 }
 
 @keyframes spin-border {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
-/* Neon Scan divider scanning keyframes */
+/* ─── Scan-line dividers ──────────────────────────────────── */
 @keyframes scan-line-h {
-  0% { left: -100%; }
+  0%   { left: -100%; }
   100% { left: 200%; }
 }
 @keyframes scan-line-v {
-  0% { top: -100%; }
+  0%   { top: -100%; }
   100% { top: 200%; }
 }
 
+/* ─── Hero orbit rings visibility on mobile ──────────────── */
+/* Hide outer orbit on mobile, scale inner orbit smaller */
+@media (max-width: 640px) {
+  .hero-outer-orbit {
+    display: none;
+  }
+  .hero-inner-orbit {
+    /* Inner orbit icon sizes adapt via the scale on the parent */
+    opacity: 0.85;
+  }
+}
 
+/* ─── Mobile Performance Overrides ───────────────────────── */
+@media (max-width: 768px) {
+  /* Reduce blur radii on mobile — expensive GPU operation */
+  [style*="blur(110px)"],
+  [style*="blur(130px)"],
+  [style*="blur(90px)"] {
+    /* These inline styles can't be overridden, handled in components instead */
+    display: none; /* Background ambient blobs hidden on mobile */
+  }
+
+  /* Disable decorative continuous animations on mobile */
+  .animate-float-logo {
+    animation: none;
+  }
+}
+
+/* ─── Reduced Motion Support ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.15ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Mobile QA Fixes ─────────────────────────────────────── */
+
+/* Prevent any element from causing horizontal overflow on mobile */
+@media (max-width: 768px) {
+  /* Hard clamp all absolutely positioned decorative blobs */
+  section {
+    overflow-x: hidden !important;
+  }
+
+  /* Portfolio filter bar: allow scrolling on tiny screens */
+  .portfolio-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100% !important;
+    border-radius: 12px !important;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .portfolio-filter::-webkit-scrollbar { display: none; }
+
+  /* Hero orbit ring: clip to viewport so it doesn't cause scroll */
+  .hero-orbit-container {
+    overflow: hidden;
+  }
+
+  /* Reduce excessive section vertical padding on small screens */
+  section.py-28 {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  section.py-24 {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  /* ProcessSection code blocks: don't overflow on mobile */
+  pre, code {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* Prevent stagger offsets from causing overflow in portfolio */
+  .lg\:mt-12, .lg\:mt-24,
+  .md\:mt-12 {
+    margin-top: 0 !important;
+  }
+}
+
+/* Extra small screen (320px) specific fixes */
+@media (max-width: 360px) {
+  /* Reduce hero headline size on iPhone SE */
+  .hero-headline {
+    font-size: clamp(1.85rem, 8vw, 2.4rem);
+  }
+
+  /* Smaller gap between CTA buttons */
+  .hero-cta-group {
+    gap: 0.625rem;
+  }
+
+  /* Stack info pills in contact section */
+  .contact-info-pills {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .contact-info-pills > div {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

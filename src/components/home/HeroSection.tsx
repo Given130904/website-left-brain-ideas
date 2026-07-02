@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useSiteReveal } from '../../contexts/SiteRevealContext';
 
 const EASE = [0.16, 1, 0.3, 1] as any;
 
@@ -141,10 +142,6 @@ interface OrbitIconProps {
   index: number;
   isClockwise?: boolean;
   isOrbitPaused: boolean;
-  isContainerHovered: boolean;
-  mousePos: { x: number; y: number };
-  onHoverStart: () => void;
-  onHoverEnd: () => void;
   size?: number;
 }
 
@@ -156,32 +153,43 @@ function OrbitIcon({
   index,
   isClockwise = true,
   isOrbitPaused,
-  isContainerHovered,
-  mousePos,
-  onHoverStart,
-  onHoverEnd,
   size = 46
 }: OrbitIconProps) {
   const [isSelfHovered, setIsSelfHovered] = useState(false);
+  const [isAnyOrbitHovered, setIsAnyOrbitHovered] = useState(false);
+  const [isContainerHovered, setIsContainerHovered] = useState(false);
   const techData = TechIcons[name];
   const motionProfile = ICON_MOTION_PROFILES[index % ICON_MOTION_PROFILES.length];
 
+  useEffect(() => {
+    const handleHover = (e: Event) => {
+      setIsAnyOrbitHovered((e as CustomEvent).detail.hovered);
+    };
+    const handleContainerHover = (e: Event) => {
+      setIsContainerHovered((e as CustomEvent).detail.hovered);
+    };
+    window.addEventListener('hero-orbit-hover', handleHover);
+    window.addEventListener('hero-container-hover', handleContainerHover);
+    return () => {
+      window.removeEventListener('hero-orbit-hover', handleHover);
+      window.removeEventListener('hero-container-hover', handleContainerHover);
+    };
+  }, []);
+
   const handleMouseEnter = () => {
     setIsSelfHovered(true);
-    onHoverStart();
+    window.dispatchEvent(new CustomEvent('hero-orbit-hover', { detail: { hovered: true } }));
   };
 
   const handleMouseLeave = () => {
     setIsSelfHovered(false);
-    onHoverEnd();
+    window.dispatchEvent(new CustomEvent('hero-orbit-hover', { detail: { hovered: false } }));
   };
 
   const animName = isClockwise ? 'hero-orbit-cw' : 'hero-orbit-ccw';
   const counterAnimName = isClockwise ? 'hero-orbit-ccw' : 'hero-orbit-cw';
 
-  // Proximity magnetic reaction offsets
-  const magX = isContainerHovered ? mousePos.x * 0.8 : 0;
-  const magY = isContainerHovered ? mousePos.y * 0.8 : 0;
+  const shouldPause = isOrbitPaused || isAnyOrbitHovered;
 
   return (
     <div
@@ -190,7 +198,7 @@ function OrbitIcon({
         width: 0,
         height: 0,
         animation: `${animName} ${orbitDuration}s linear infinite`,
-        animationPlayState: isOrbitPaused ? 'paused' : 'running',
+        animationPlayState: shouldPause ? 'paused' : 'running',
         willChange: 'transform',
       }}
     >
@@ -211,7 +219,7 @@ function OrbitIcon({
             width: size,
             height: size,
             animation: `${counterAnimName} ${orbitDuration}s linear infinite`,
-            animationPlayState: isOrbitPaused ? 'paused' : 'running',
+            animationPlayState: shouldPause ? 'paused' : 'running',
             transform: `rotate(${-angle}deg)`,
             willChange: 'transform',
           }}
@@ -220,10 +228,12 @@ function OrbitIcon({
           onMouseLeave={handleMouseLeave}
         >
           {/* Magnetic Reaction Wrapper */}
-          <motion.div
-            animate={{ x: magX, y: magY }}
-            transition={{ type: 'spring', stiffness: 250, damping: 20 }}
+          <div
             className="w-full h-full"
+            style={{
+              transform: 'translate(calc(var(--magnet-x) * 0.8), calc(var(--magnet-y) * 0.8))',
+              transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
           >
             {/* Organic Lifelike Floating/Swaying Motion Wrapper */}
             <motion.div
@@ -268,7 +278,7 @@ function OrbitIcon({
                 </div>
               </motion.div>
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* Tooltip */}
           <AnimatePresence>
@@ -294,13 +304,65 @@ function OrbitIcon({
 }
 
 // ─── Main Hero Section ────────────────────────────────────────────────────────
+const innerOrbit = [
+  { name: 'React', angle: 0 },
+  { name: 'Next.js', angle: 51.4 },
+  { name: 'Tailwind', angle: 102.8 },
+  { name: 'JavaScript', angle: 154.2 },
+  { name: 'HTML5', angle: 205.7 },
+  { name: 'CSS3', angle: 257.1 },
+  { name: 'Figma', angle: 308.5 },
+];
+
+const outerOrbit = [
+  { name: 'Laravel', angle: 0 },
+  { name: 'PHP', angle: 32.7 },
+  { name: 'Python', angle: 65.4 },
+  { name: 'MySQL', angle: 98.1 },
+  { name: 'Kotlin', angle: 130.9 },
+  { name: 'Photoshop', angle: 163.6 },
+  { name: 'Illustrator', angle: 196.3 },
+  { name: 'Premiere', angle: 229.1 },
+  { name: 'After Effects', angle: 261.8 },
+  { name: 'CapCut', angle: 294.5 },
+  { name: 'Canva', angle: 327.2 },
+];
+
+// ─── Main Hero Section ────────────────────────────────────────────────────────
 export default function HeroSection() {
   const { t } = useTranslation();
-  const [hoveredTech, setHoveredTech] = useState<string | null>(null);
-  const [isContainerHovered, setIsContainerHovered] = useState(false);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const { isRevealed, isCinematic, isSettled } = useSiteReveal();
 
-  const benefits = [
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [orbitStarted, setOrbitStarted] = useState(false);
+  const [isIntersecting, setIsIntersecting] = useState(false);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (isIntersecting) {
+      const timer = setTimeout(() => {
+        setOrbitStarted(true);
+      }, 2000);
+      return () => clearTimeout(timer);
+    } else {
+      setOrbitStarted(false);
+    }
+  }, [isIntersecting]);
+
+  const benefits = useMemo(() => [
     {
       icon: '💬',
       title: t('hero.benefit1_title'),
@@ -321,56 +383,59 @@ export default function HeroSection() {
       title: t('hero.benefit4_title'),
       desc: t('hero.benefit4_desc'),
     },
-  ];
+  ], [t]);
 
-  // Evenly spread orbit rings (Radius ~25-35% closer: Inner 195px, Outer 285px)
-  const innerOrbit = [
-    { name: 'React', angle: 0 },
-    { name: 'Next.js', angle: 51.4 },
-    { name: 'Tailwind', angle: 102.8 },
-    { name: 'JavaScript', angle: 154.2 },
-    { name: 'HTML5', angle: 205.7 },
-    { name: 'CSS3', angle: 257.1 },
-    { name: 'Figma', angle: 308.5 },
-  ];
+  // Direct DOM manipulation for mouse interactive magnet transitions (no React state updates)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-  const outerOrbit = [
-    { name: 'Laravel', angle: 0 },
-    { name: 'PHP', angle: 32.7 },
-    { name: 'Python', angle: 65.4 },
-    { name: 'MySQL', angle: 98.1 },
-    { name: 'Kotlin', angle: 130.9 },
-    { name: 'Photoshop', angle: 163.6 },
-    { name: 'Illustrator', angle: 196.3 },
-    { name: 'Premiere', angle: 229.1 },
-    { name: 'After Effects', angle: 261.8 },
-    { name: 'CapCut', angle: 294.5 },
-    { name: 'Canva', angle: 327.2 },
-  ];
+    let rafId: number | null = null;
 
-  const isAnyHovered = hoveredTech !== null;
+    const onMouseMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const x = (e.clientX - centerX) / 14;
+      const y = (e.clientY - centerY) / 14;
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    setMousePos({
-      x: (e.clientX - centerX) / 14,
-      y: (e.clientY - centerY) / 14,
-    });
-  };
+      if (rafId === null) {
+        rafId = requestAnimationFrame(() => {
+          el.style.setProperty('--magnet-x', `${x}px`);
+          el.style.setProperty('--magnet-y', `${y}px`);
+          rafId = null;
+        });
+      }
+    };
 
-  const handleMouseEnterContainer = () => {
-    setIsContainerHovered(true);
-  };
+    const onMouseEnter = () => {
+      window.dispatchEvent(new CustomEvent('hero-container-hover', { detail: { hovered: true } }));
+    };
 
-  const handleMouseLeaveContainer = () => {
-    setIsContainerHovered(false);
-    setMousePos({ x: 0, y: 0 });
-  };
+    const onMouseLeave = () => {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      el.style.setProperty('--magnet-x', '0px');
+      el.style.setProperty('--magnet-y', '0px');
+      window.dispatchEvent(new CustomEvent('hero-container-hover', { detail: { hovered: false } }));
+    };
+
+    el.addEventListener('mousemove', onMouseMove, { passive: true });
+    el.addEventListener('mouseenter', onMouseEnter, { passive: true });
+    el.addEventListener('mouseleave', onMouseLeave, { passive: true });
+
+    return () => {
+      el.removeEventListener('mousemove', onMouseMove);
+      el.removeEventListener('mouseenter', onMouseEnter);
+      el.removeEventListener('mouseleave', onMouseLeave);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-24 pb-16 overflow-hidden bg-[#050505]">
+    <section ref={sectionRef} className="relative min-h-[100svh] flex items-center justify-center pt-24 pb-16 overflow-hidden bg-[#050505]">
       {/* ── Custom Keyframe Animations & Energy Flow Styles ─────── */}
       <style>{`
         @keyframes hero-orbit-cw {
@@ -447,8 +512,8 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.75, delay: 0.05, ease: EASE }}
-              className="font-heading font-extrabold text-white leading-[1.06] mb-6 tracking-tight"
-              style={{ fontSize: 'clamp(2.4rem, 4.5vw, 3.8rem)' }}
+              className="font-heading font-extrabold text-white leading-[1.06] mb-6 tracking-tight hero-headline"
+              style={{ fontSize: 'clamp(2rem, 5.5vw, 3.8rem)' }}
             >
               {t('hero.headline1')}<br />
               <span
@@ -486,7 +551,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
-              className="flex flex-wrap items-center gap-4 mb-10"
+              className="flex flex-wrap items-center gap-3 mb-10 hero-cta-group"
             >
               {/* Primary CTA with Animated Gradient Border */}
               <motion.button
@@ -581,124 +646,124 @@ export default function HeroSection() {
 
           {/* ── RIGHT: Logo + Orbit Column ──────────────── */}
           <div
-            className="lg:col-span-7 flex items-center justify-center relative order-1 lg:order-2"
-            onMouseEnter={handleMouseEnterContainer}
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeaveContainer}
+            ref={containerRef}
+            className="lg:col-span-7 flex items-center justify-center relative order-1 lg:order-2 hero-orbit-container"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-                x: mousePos.x * 0.8,
-                y: mousePos.y * 0.8,
+            <div
+              style={{
+                transform: 'translate(calc(var(--magnet-x) * 0.8), calc(var(--magnet-y) * 0.8))',
+                transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
-              transition={{
-                opacity: { duration: 1, delay: 0.2, ease: EASE },
-                scale: { duration: 1, delay: 0.2, ease: EASE },
-                x: { type: 'spring', stiffness: 140, damping: 24 },
-                y: { type: 'spring', stiffness: 140, damping: 24 },
-              }}
-              className="relative flex items-center justify-center scale-[0.7] sm:scale-[0.85] md:scale-[0.95] lg:scale-100 transition-transform duration-300"
-              style={{ width: 640, height: 640 }}
             >
-              {/* Animated Glowing Outer orbit guideline ring */}
-              <div
-                className="absolute rounded-full border pointer-events-none"
-                style={{
-                  width: 570,
-                  height: 570,
-                  animation: 'hero-ring-energy 8s ease-in-out infinite',
-                }}
-              />
-              {/* Animated Glowing Inner orbit guideline ring */}
-              <div
-                className="absolute rounded-full border border-dashed pointer-events-none"
-                style={{
-                  width: 390,
-                  height: 390,
-                  animation: 'hero-ring-energy 6s ease-in-out infinite 1s',
-                }}
-              />
-
-              {/* ── Soft Lighting & Glow behind Logo ── */}
-              <div
-                className="absolute w-[340px] h-[340px] rounded-full pointer-events-none"
-                style={{
-                  background: 'radial-gradient(circle, rgba(255,255,255,0.14) 0%, rgba(34,211,238,0.08) 35%, transparent 70%)',
-                  filter: 'blur(30px)',
-                  animation: 'hero-glow-pulse 6s ease-in-out infinite',
-                }}
-              />
-
-              {/* ── Inner Orbit Ring (7 icons, Clockwise, 55s) ── */}
-              {innerOrbit.map(({ name, angle }, idx) => (
-                <OrbitIcon
-                  key={name}
-                  name={name}
-                  angle={angle}
-                  radius={195}
-                  orbitDuration={55}
-                  index={idx}
-                  isClockwise={true}
-                  isOrbitPaused={isAnyHovered}
-                  isContainerHovered={isContainerHovered}
-                  mousePos={mousePos}
-                  onHoverStart={() => setHoveredTech(name)}
-                  onHoverEnd={() => setHoveredTech(null)}
-                  size={44}
-                />
-              ))}
-
-              {/* ── Outer Orbit Ring (11 icons, Counter-Clockwise, 85s) ── */}
-              {outerOrbit.map(({ name, angle }, idx) => (
-                <OrbitIcon
-                  key={name}
-                  name={name}
-                  angle={angle}
-                  radius={285}
-                  orbitDuration={85}
-                  index={idx + 7}
-                  isClockwise={false}
-                  isOrbitPaused={isAnyHovered}
-                  isContainerHovered={isContainerHovered}
-                  mousePos={mousePos}
-                  onHoverStart={() => setHoveredTech(name)}
-                  onHoverEnd={() => setHoveredTech(null)}
-                  size={44}
-                />
-              ))}
-
-              {/* ── Central Main Logo (Scaled ~1.5x smaller as requested) ── */}
               <motion.div
-                animate={{
-                  scale: [1, 1.025, 1],
-                  y: [0, -5, 0],
-                  x: mousePos.x * 0.4,
-                }}
+                initial={isCinematic ? { opacity: 0, scale: 0.9 } : false}
+                animate={isCinematic ? (isRevealed ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }) : { opacity: 1, scale: 1 }}
                 transition={{
-                  scale: { duration: 5.5, repeat: Infinity, ease: 'easeInOut' },
-                  y: { duration: 5.5, repeat: Infinity, ease: 'easeInOut' },
-                  x: { type: 'spring', stiffness: 140, damping: 24 },
+                  opacity: { duration: 1.2, delay: isCinematic ? 1.2 : 0.2, ease: EASE },
+                  scale: { duration: 1.2, delay: isCinematic ? 1.2 : 0.2, ease: EASE },
                 }}
-                className="relative z-20 flex flex-col items-center justify-center pointer-events-none select-none"
+                className="relative flex items-center justify-center scale-[0.7] sm:scale-[0.85] md:scale-[0.95] lg:scale-100 transition-transform duration-300"
+                style={{ width: 640, height: 640 }}
               >
-                <img
-                  src="/assets/images/logo-left-brain-ideas.svg"
-                  alt="Left Brain Ideas"
-                  draggable={false}
-                  className="select-none object-contain"
+                {/* Animated Glowing Outer orbit guideline ring */}
+                <div
+                  className="absolute rounded-full border pointer-events-none"
                   style={{
-                    width: 'clamp(240px, 26vw, 350px)',
-                    height: 'auto',
-                    display: 'block',
-                    filter: 'drop-shadow(0 0 30px rgba(255,255,255,0.22)) drop-shadow(0 0 60px rgba(34,211,238,0.18))',
+                    width: 570,
+                    height: 570,
+                    animation: 'hero-ring-energy 8s ease-in-out infinite',
                   }}
                 />
-              </motion.div>
+                {/* Animated Glowing Inner orbit guideline ring */}
+                <div
+                  className="absolute rounded-full border border-dashed pointer-events-none"
+                  style={{
+                    width: 390,
+                    height: 390,
+                    animation: 'hero-ring-energy 6s ease-in-out infinite 1s',
+                  }}
+                />
 
-            </motion.div>
+                {/* ── Soft Lighting & Glow behind Logo ── */}
+                <div
+                  className="absolute w-[340px] h-[340px] rounded-full pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(255,255,255,0.14) 0%, rgba(34,211,238,0.08) 35%, transparent 70%)',
+                    filter: 'blur(30px)',
+                    animation: 'hero-glow-pulse 6s ease-in-out infinite',
+                  }}
+                />
+
+                {/* ── Inner Orbit Ring (7 icons, Clockwise, 55s) ── */}
+                {innerOrbit.map(({ name, angle }, idx) => (
+                  <OrbitIcon
+                    key={name}
+                    name={name}
+                    angle={angle}
+                    radius={195}
+                    orbitDuration={55}
+                    index={idx}
+                    isClockwise={true}
+                    isOrbitPaused={!orbitStarted}
+                    size={44}
+                  />
+                ))}
+
+                {/* ── Outer Orbit Ring (11 icons, Counter-Clockwise, 85s) ── */}
+                {outerOrbit.map(({ name, angle }, idx) => (
+                  <OrbitIcon
+                    key={name}
+                    name={name}
+                    angle={angle}
+                    radius={285}
+                    orbitDuration={85}
+                    index={idx + 7}
+                    isClockwise={false}
+                    isOrbitPaused={!orbitStarted}
+                    size={44}
+                  />
+                ))}
+
+                {/* ── Central Main Logo (Scaled ~1.5x smaller as requested) ── */}
+                <motion.div
+                  animate={isSettled ? {
+                    scale: [1, 1.025, 1],
+                    y: [0, -5, 0],
+                  } : {
+                    scale: 1,
+                    y: 0,
+                  }}
+                  transition={{
+                    scale: { duration: 5.5, repeat: Infinity, ease: 'easeInOut' },
+                    y: { duration: 5.5, repeat: Infinity, ease: 'easeInOut' },
+                  }}
+                  style={{
+                    transform: 'translate(calc(var(--magnet-x) * -0.4), calc(var(--magnet-y) * -0.4))',
+                    transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)'
+                  }}
+                  className="relative z-20 flex flex-col items-center justify-center pointer-events-none select-none"
+                >
+                  <img
+                    src="/assets/images/logo-left-brain-ideas.svg"
+                    alt="Left Brain Ideas"
+                    draggable={false}
+                    className="select-none object-contain"
+                    style={{
+                      width: 'clamp(240px, 26vw, 350px)',
+                      height: 'auto',
+                      display: 'block',
+                      filter: 'drop-shadow(0 0 30px rgba(255,255,255,0.22)) drop-shadow(0 0 60px rgba(34,211,238,0.18))',
+                    }}
+                  />
+                </motion.div>
+
+              </motion.div>
+            </div>
           </div>
 
         </div>

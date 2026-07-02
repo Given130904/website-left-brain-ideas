@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useInView } from 'framer-motion';
 import { ArrowRight, Globe, ShoppingBag, LayoutDashboard, Compass, Database } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -10,14 +10,11 @@ interface ProjectCardProps {
   project: any;
   index: number;
   t: any;
-  isDimmed: boolean;
-  onHoverStart: () => void;
-  onHoverEnd: () => void;
   isInView: boolean;
 }
 
-// 3D Parallax Tilt Card Component
-function ProjectCard({ project, index, t, isDimmed, onHoverStart, onHoverEnd, isInView }: ProjectCardProps) {
+// 3D Parallax Tilt Card Component — memoized to prevent re-renders from parent state changes
+const ProjectCard = memo(function ProjectCard({ project, index, t, isInView }: ProjectCardProps) {
   const cardRef = useRef<HTMLAnchorElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   
@@ -43,12 +40,10 @@ function ProjectCard({ project, index, t, isDimmed, onHoverStart, onHoverEnd, is
     x.set(0);
     y.set(0);
     setIsHovered(false);
-    onHoverEnd();
   };
 
   const handleMouseEnter = () => {
     setIsHovered(true);
-    onHoverStart();
   };
 
   return (
@@ -64,15 +59,14 @@ function ProjectCard({ project, index, t, isDimmed, onHoverStart, onHoverEnd, is
         rotateX,
         rotateY,
         transformStyle: 'preserve-3d',
-        willChange: 'transform, opacity',
       }}
-      // Floating and dimming animations combined to prevent duplicate JSX properties
+      // Floating animations
       animate={
         isHovered 
-          ? { y: -10, opacity: isDimmed ? 0.45 : 1 } 
+          ? { y: -10 } 
           : isInView 
-            ? { y: [0, -6, 0], opacity: isDimmed ? 0.45 : 1 } 
-            : { y: 0, opacity: isDimmed ? 0.45 : 1 }
+            ? { y: [0, -6, 0] } 
+            : { y: 0 }
       }
       transition={
         isHovered 
@@ -83,25 +77,19 @@ function ProjectCard({ project, index, t, isDimmed, onHoverStart, onHoverEnd, is
                 duration: 6,
                 ease: "easeInOut",
                 delay: index * 0.3,
-              },
-              opacity: {
-                duration: 0.3,
-                ease: EASE
               }
             }
       }
-      className="relative flex flex-col w-full h-full rounded-[20px] bg-neutral-900/40 backdrop-blur-xl border border-white/8 p-3 transition-colors duration-300 select-none group"
+      className="relative flex flex-col w-full h-full rounded-[20px] bg-neutral-900/40 backdrop-blur-xl border border-white/8 p-3 transition-[background-color,border-color,opacity] duration-300 select-none group/card group-hover/portfolio:opacity-45 hover:!opacity-100"
     >
       {/* High-performance glowing shadow backdrop element (only animates opacity) */}
       <div 
-        className="absolute inset-0 rounded-[20px] bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 blur-xl shadow-[0_0_40px_-5px_rgba(34,211,238,0.25)]" 
-        style={{ willChange: 'opacity' }}
+        className="absolute inset-0 rounded-[20px] bg-cyan-500/10 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 blur-xl shadow-[0_0_40px_-5px_rgba(34,211,238,0.25)]" 
       />
       
       {/* High-performance border glow element (only animates opacity) */}
       <div 
-        className="absolute inset-0 rounded-[20px] border border-cyan-400/35 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" 
-        style={{ willChange: 'opacity' }}
+        className="absolute inset-0 rounded-[20px] border border-cyan-400/35 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 pointer-events-none" 
       />
 
       {/* Realistic Browser Mockup Preview Container */}
@@ -132,7 +120,6 @@ function ProjectCard({ project, index, t, isDimmed, onHoverStart, onHoverEnd, is
             alt={project.name}
             className="w-full h-full object-cover object-top transition-transform duration-[1200ms] ease-out group-hover/browser:scale-103"
             loading="lazy"
-            style={{ willChange: 'transform' }}
           />
           
           {/* Glass Reflection Overlay */}
@@ -163,7 +150,7 @@ function ProjectCard({ project, index, t, isDimmed, onHoverStart, onHoverEnd, is
       {/* Details Section */}
       <div 
         className="px-3 pt-5 pb-2 flex flex-col flex-grow text-left"
-        style={{ transform: 'translateZ(18px)', willChange: 'transform' }}
+        style={{ transform: 'translateZ(18px)' }}
       >
         <h3 className="text-lg font-heading font-extrabold text-white mb-2 group-hover:text-[#22D3EE] transition-colors duration-300">
           {project.name}
@@ -193,24 +180,23 @@ function ProjectCard({ project, index, t, isDimmed, onHoverStart, onHoverEnd, is
       </div>
     </motion.a>
   );
-}
+});
 
 export default function PortfolioSection() {
   const { t } = useTranslation();
-  const [activeFilter, setActiveFilter] = useState('All');
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [activeFilter, setActiveFilter] = useState('all');
   
   // Ref to monitor viewport visibility and pause off-screen animations
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { margin: '-50px' });
 
   const filters = [
-    { key: 'All', translateKey: 'all' },
-    { key: 'Company Profile', translateKey: 'company_profile' },
-    { key: 'Dashboard', translateKey: 'dashboard' },
-    { key: 'E-Commerce', translateKey: 'ecommerce' },
-    { key: 'Travel', translateKey: 'travel' },
-    { key: 'Management System', translateKey: 'management_system' }
+    { key: 'all', translateKey: 'all' },
+    { key: 'company_profile', translateKey: 'company_profile' },
+    { key: 'dashboard', translateKey: 'dashboard' },
+    { key: 'ecommerce', translateKey: 'ecommerce' },
+    { key: 'travel', translateKey: 'travel' },
+    { key: 'management_system', translateKey: 'management_system' }
   ];
 
   const projects = [
@@ -305,29 +291,35 @@ export default function PortfolioSection() {
     },
   ];
 
-  const filteredProjects = activeFilter === 'All'
-    ? projects
-    : projects.filter((p) => p.category === activeFilter);
+  const filteredProjects = useMemo(() =>
+    activeFilter === 'all' ? projects : projects.filter(p => p.categoryKey === activeFilter)
+  , [activeFilter, projects]);
 
-  // Framer Motion container variants for staggered scrolling animation
-  const gridVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.08,
-      },
-    },
-  };
+
+
+  // Stable callback for filter click
+  const handleFilterClick = useCallback((key: string) => {
+    setActiveFilter(key);
+  }, []);
 
   const cardVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.98 },
-    visible: {
+    hidden: { opacity: 0, scale: 0.94, y: 15 },
+    visible: (index: number) => ({
       opacity: 1,
-      y: 0,
       scale: 1,
+      y: 0,
       transition: {
-        duration: 0.6,
+        duration: 0.45,
+        delay: (index % 6) * 0.05,
+        ease: EASE,
+      },
+    }),
+    exit: {
+      opacity: 0,
+      scale: 0.94,
+      y: 15,
+      transition: {
+        duration: 0.3,
         ease: EASE,
       },
     },
@@ -346,7 +338,7 @@ export default function PortfolioSection() {
     <section
       id="portfolio"
       ref={sectionRef}
-      className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8 pb-48 lg:pb-64"
+      className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8 pb-20 lg:pb-48"
     >
       {/* Animated scan-line top & bottom dividers (animations pause when section is offscreen) */}
       <style>{`
@@ -373,16 +365,16 @@ export default function PortfolioSection() {
         <div className={`bg-gradient-to-r from-transparent via-[#3B82F6]/50 to-transparent ${isInView ? 'animate-scan' : 'absolute left-[-30%]'}`} style={{ animationDelay: '2s' }} />
       </div>
 
-      {/* Premium ambient glows */}
-      <div className="absolute top-[15%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.03)_0%,transparent_70%)] filter blur-[110px] pointer-events-none -z-10 animate-pulse-glow" />
-      <div className="absolute bottom-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.02)_0%,transparent_70%)] filter blur-[130px] pointer-events-none -z-10" />
+      {/* Ambient glows — static, no continuous animation */}
+      <div className="absolute top-[15%] left-[-10%] w-[400px] h-[400px] rounded-full pointer-events-none -z-10 opacity-70" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.04) 0%, rgba(34,211,238,0.01) 40%, transparent 70%)' }} />
+      <div className="absolute bottom-[20%] right-[-10%] w-[400px] h-[400px] rounded-full pointer-events-none -z-10 opacity-50" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.03) 0%, transparent 70%)' }} />
 
-      {/* Animated glowing particles (pauses when section is offscreen) */}
+      {/* Animated glowing particles (viewport gated) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className={`absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-cyan-400/40 filter blur-xs ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '7s', animationDelay: '0s' }} />
-        <div className={`absolute top-[45%] right-[12%] w-3.5 h-3.5 rounded-full bg-blue-400/30 filter blur-[2px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '10s', animationDelay: '2.5s' }} />
-        <div className={`absolute bottom-[35%] left-[8%] w-1.5 h-1.5 rounded-full bg-[#22D3EE]/50 filter blur-none ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '6s', animationDelay: '1.2s' }} />
-        <div className={`absolute bottom-[15%] right-[22%] w-4 h-4 rounded-full bg-purple-500/20 filter blur-[3px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '13s', animationDelay: '3.8s' }} />
+        <div className={`absolute top-[15%] left-[20%] w-2 h-2 rounded-full bg-cyan-400/30 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '7s', animationDelay: '0s' }} />
+        <div className={`absolute top-[45%] right-[12%] w-3 h-3 rounded-full bg-blue-400/20 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '10s', animationDelay: '2.5s' }} />
+        <div className={`absolute bottom-[35%] left-[8%] w-1.5 h-1.5 rounded-full bg-[#22D3EE]/35 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '6s', animationDelay: '1.2s' }} />
+        <div className={`absolute bottom-[15%] right-[22%] w-3 h-3 rounded-full bg-purple-500/15 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '13s', animationDelay: '3.8s' }} />
       </div>
 
       <div className="container relative z-10">
@@ -420,13 +412,13 @@ export default function PortfolioSection() {
         </div>
 
         {/* Premium segmented filter controls */}
-        <div className="flex flex-wrap justify-center gap-1 md:gap-2 mb-20 px-3 py-2 bg-neutral-950/45 backdrop-blur-xl border border-white/5 rounded-full max-w-fit mx-auto shadow-[0_8px_32px_rgba(0,0,0,0.5)] relative z-20">
+        <div className="portfolio-filter flex justify-center gap-1 md:gap-2 mb-16 px-3 py-2 bg-neutral-950/45 backdrop-blur-xl border border-white/5 rounded-full max-w-fit mx-auto shadow-[0_8px_32px_rgba(0,0,0,0.5)] relative z-20">
           {filters.map((filter) => {
             const isActive = activeFilter === filter.key;
             return (
               <button
                 key={filter.key}
-                onClick={() => setActiveFilter(filter.key)}
+                onClick={() => handleFilterClick(filter.key)}
                 className={`relative px-4 py-2 text-[11px] md:text-xs font-bold rounded-full cursor-pointer select-none transition-all duration-300 ${
                   isActive ? 'text-[#050505] font-extrabold' : 'text-[#B5B5B5] hover:text-white'
                 }`}
@@ -447,34 +439,30 @@ export default function PortfolioSection() {
           })}
         </div>
 
-        {/* Project Cards Grid */}
-        <motion.div
-          variants={gridVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 lg:gap-x-10 lg:gap-y-16 w-full px-6 lg:px-0"
-        >
-          <AnimatePresence mode="popLayout">
+        {/* Project Cards Grid with group/portfolio */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 lg:gap-x-10 lg:gap-y-16 w-full px-6 lg:px-0 group/portfolio">
+          <AnimatePresence>
             {filteredProjects.map((project, index) => (
               <motion.div
                 key={project.id}
+                layout
+                custom={index}
                 variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
                 className={getStaggerClass(index)}
               >
                 <ProjectCard
                   project={project}
                   index={index}
                   t={t}
-                  isDimmed={hoveredIndex !== null && hoveredIndex !== index}
-                  onHoverStart={() => setHoveredIndex(index)}
-                  onHoverEnd={() => setHoveredIndex(null)}
                   isInView={isInView}
                 />
               </motion.div>
             ))}
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

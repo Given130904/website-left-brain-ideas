@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useSpring, useTransform, useInView, useMotionValue } from 'framer-motion';
 import { MessageSquare, Palette, Code2, ShieldCheck, Rocket } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +22,6 @@ function ProcessStep({ step, idx, t, isLeft, isInView: sectionInView }: ProcessS
   const isActive = useInView(stepRef, { once: false, margin: "-180px 0px" });
 
   const cardRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
 
   // Parallax spring-tilt coordinates (subtle ±5deg limit)
   const x = useMotionValue(0);
@@ -42,11 +41,6 @@ function ProcessStep({ step, idx, t, isLeft, isInView: sectionInView }: ProcessS
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
-    setIsHovered(false);
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
   };
 
   const itemVariants = {
@@ -102,33 +96,29 @@ function ProcessStep({ step, idx, t, isLeft, isInView: sectionInView }: ProcessS
       {/* Card Container (ScrollReveal entrance) */}
       <motion.div
         variants={itemVariants}
-        className={`w-full md:w-[45%] pl-12 md:pl-0 ${
+        className={`w-full md:w-[45%] pl-14 md:pl-0 ${
           isLeft ? 'md:pr-10' : 'md:pl-10'
         }`}
       >
         <motion.div
           ref={cardRef}
           onMouseMove={handleMouseMove}
-          onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           style={{
             rotateX,
             rotateY,
             transformStyle: 'preserve-3d',
-            willChange: 'transform, opacity',
           }}
           // Staggered Y float loops (pause on hover or offscreen)
           animate={
-            isHovered 
-              ? { y: -8 } 
-              : sectionInView && !isActive
-                ? { y: [0, -4, 0] } 
-                : { y: 0 }
+            sectionInView && !isActive
+              ? { y: [0, -4, 0] } 
+              : { y: 0 }
           }
+          whileHover="hover"
           transition={
-            isHovered 
-              ? { duration: 0.3, ease: EASE } 
-              : {
+            sectionInView && !isActive
+              ? {
                   y: {
                     repeat: Infinity,
                     duration: 5,
@@ -136,34 +126,29 @@ function ProcessStep({ step, idx, t, isLeft, isInView: sectionInView }: ProcessS
                     delay: idx * 0.4,
                   }
                 }
+              : { duration: 0.3, ease: EASE }
           }
           className="relative flex flex-col w-full h-full rounded-[20px] bg-neutral-900/40 backdrop-blur-xl border border-white/8 p-6 transition-all duration-500 overflow-hidden select-none group text-left"
         >
           {/* Subtle top border highlight (glows cyan when hovered/active) */}
           <div 
-            className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#22D3EE] to-transparent transition-opacity duration-500"
-            style={{ 
-              opacity: isHovered || isActive ? 0.35 : 0, 
-              willChange: 'opacity' 
-            }}
+            className={`absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#22D3EE] to-transparent transition-opacity duration-500 ${
+              isActive ? 'opacity-35' : 'opacity-0 group-hover:opacity-35'
+            }`}
           />
 
           {/* High-performance glowing shadow backdrop element (only animates opacity) */}
           <div 
-            className="absolute inset-0 rounded-[20px] bg-cyan-500/5 opacity-0 transition-opacity duration-300 pointer-events-none -z-10 blur-xl shadow-[0_0_30px_-5px_rgba(34,211,238,0.25)]" 
-            style={{ 
-              opacity: isHovered || isActive ? 1 : 0,
-              willChange: 'opacity' 
-            }}
+            className={`absolute inset-0 rounded-[20px] bg-cyan-500/5 transition-opacity duration-300 pointer-events-none -z-10 blur-xl shadow-[0_0_30px_-5px_rgba(34,211,238,0.25)] ${
+              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
           />
           
           {/* High-performance border glow element (only animates opacity) */}
           <div 
-            className="absolute inset-0 rounded-[20px] border border-cyan-400/25 opacity-0 transition-opacity duration-300 pointer-events-none" 
-            style={{ 
-              opacity: isHovered || isActive ? 1 : 0,
-              willChange: 'opacity' 
-            }}
+            className={`absolute inset-0 rounded-[20px] border border-cyan-400/25 transition-opacity duration-300 pointer-events-none ${
+              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
           />
 
           {/* Animated floating particles inside active cards */}
@@ -175,25 +160,29 @@ function ProcessStep({ step, idx, t, isLeft, isInView: sectionInView }: ProcessS
           )}
 
           {/* Title + Icon */}
-          <div className="flex items-center justify-between mb-4" style={{ transform: 'translateZ(15px)', willChange: 'transform' }}>
+          <div className="flex items-center justify-between mb-4" style={{ transform: 'translateZ(15px)' }}>
             <div className="flex items-center gap-3">
               <div 
-                className="w-10 h-10 rounded-xl bg-white/3 border border-white/5 flex items-center justify-center shrink-0 transition-all duration-500"
-                style={{
-                  backgroundColor: isHovered || isActive ? 'rgba(34, 211, 238, 0.1)' : 'rgba(255, 255, 255, 0.03)',
-                  borderColor: isHovered || isActive ? 'rgba(34, 211, 238, 0.3)' : 'rgba(255, 255, 255, 0.05)',
-                  boxShadow: isHovered || isActive ? '0 0 15px rgba(34, 211, 238, 0.2)' : 'none',
-                }}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-500 ${
+                  isActive 
+                    ? 'bg-[#22D3EE]/10 border-[#22D3EE]/30 shadow-[0_0_15px_rgba(34,211,238,0.2)]' 
+                    : 'bg-white/3 border-white/5 shadow-none group-hover:bg-[#22D3EE]/10 group-hover:border-[#22D3EE]/30 group-hover:shadow-[0_0_15px_rgba(34, 211, 238, 0.2)]'
+                }`}
               >
                 <motion.div
-                  animate={isHovered || isActive ? step.activeAnimation : step.idleAnimation}
+                  variants={{
+                    hover: step.activeAnimation
+                  }}
+                  animate={isActive ? step.activeAnimation : step.idleAnimation}
                   transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
                   className="text-cyan-400"
                 >
                   {step.icon}
                 </motion.div>
               </div>
-              <h3 className="text-base font-heading font-extrabold text-white transition-colors duration-300" style={{ color: isHovered || isActive ? '#22D3EE' : '#FFFFFF' }}>
+              <h3 className={`text-base font-heading font-extrabold transition-colors duration-300 ${
+                isActive ? 'text-[#22D3EE]' : 'text-white group-hover:text-[#22D3EE]'
+              }`}>
                 {t(`process.steps.${step.key}.title`)}
               </h3>
             </div>
@@ -205,17 +194,17 @@ function ProcessStep({ step, idx, t, isLeft, isInView: sectionInView }: ProcessS
           </div>
 
           {/* Description */}
-          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-sans mb-4" style={{ transform: 'translateZ(10px)', willChange: 'transform' }}>
+          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-sans mb-4" style={{ transform: 'translateZ(10px)' }}>
             {t(`process.steps.${step.key}.desc`)}
           </p>
 
           {/* Code Snippet Box (highlights active) */}
           <div 
-            className="rounded-xl overflow-hidden bg-black/40 border border-white/5 p-4 font-mono text-[11px] leading-relaxed text-left text-gray-400 transition-colors duration-500"
+            className={`rounded-xl overflow-hidden bg-black/40 border p-4 font-mono text-[11px] leading-relaxed text-left text-gray-400 transition-colors duration-500 ${
+              isActive ? 'border-[#22D3EE]/15' : 'border-white/5 group-hover:border-[#22D3EE]/15'
+            }`}
             style={{ 
               transform: 'translateZ(20px)', 
-              willChange: 'transform',
-              borderColor: isHovered || isActive ? 'rgba(34, 211, 238, 0.15)' : 'rgba(255, 255, 255, 0.05)'
             }}
           >
             <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/5 text-[9px] text-gray-500 font-sans uppercase tracking-widest font-semibold">
@@ -333,16 +322,16 @@ export default function ProcessSection() {
     <section 
       id="process" 
       ref={sectionRef}
-      className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8 pb-40"
+      className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
-      {/* Background glow effects */}
-      <div className="absolute top-[20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,transparent_70%)] filter blur-[120px] pointer-events-none -z-10 animate-pulse-glow" />
-      <div className="absolute bottom-[20%] right-[-15%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.015)_0%,transparent_70%)] filter blur-[120px] pointer-events-none -z-10" />
+      {/* Background glow effects — static opacity */}
+      <div className="absolute top-[20%] left-[-15%] w-[400px] h-[400px] rounded-full pointer-events-none -z-10 opacity-60" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.04) 0%, transparent 70%)', filter: 'blur(60px)' }} />
+      <div className="absolute bottom-[20%] right-[-15%] w-[400px] h-[400px] rounded-full pointer-events-none -z-10 opacity-50" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.03) 0%, transparent 70%)', filter: 'blur(60px)' }} />
 
-      {/* Floating particles background (pauses when section is offscreen) */}
+      {/* Floating particles background (viewport gated) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className={`absolute top-[15%] left-[30%] w-2 h-2 rounded-full bg-cyan-400/30 filter blur-xs ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '9s', animationDelay: '0.2s' }} />
-        <div className={`absolute bottom-[25%] right-[25%] w-3 h-3 rounded-full bg-blue-400/20 filter blur-[1px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '12s', animationDelay: '2.5s' }} />
+        <div className={`absolute top-[15%] left-[30%] w-2 h-2 rounded-full bg-cyan-400/25 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '9s', animationDelay: '0.2s' }} />
+        <div className={`absolute bottom-[25%] right-[25%] w-3 h-3 rounded-full bg-blue-400/15 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '12s', animationDelay: '2.5s' }} />
       </div>
 
       <div className="container relative z-10 max-w-[1140px] mx-auto px-6">

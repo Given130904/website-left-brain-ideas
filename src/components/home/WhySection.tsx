@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
+import { motion, useInView, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { 
   Zap, 
   Shield, 
@@ -115,10 +115,9 @@ function MorphingVisual() {
             <motion.div
               animate={{
                 scale: [1, 1.08, 1],
-                boxShadow: ['0 0 10px rgba(16,185,129,0.1)', '0 0 20px rgba(16,185,129,0.3)', '0 0 10px rgba(16,185,129,0.1)']
               }}
               transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center"
+              className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shadow-[0_0_15px_rgba(16,185,129,0.2)]"
             >
               <Lock className="w-4 h-4 text-emerald-400" />
             </motion.div>
@@ -131,45 +130,58 @@ function MorphingVisual() {
   );
 }
 
+const featureCards = [
+  {
+    icon: <Zap className="w-5 h-5 text-[#22D3EE]" />,
+    title: 'Cepat',
+    description: 'Website ringan dan loading cepat.'
+  },
+  {
+    icon: <Shield className="w-5 h-5 text-[#22D3EE]" />,
+    title: 'Aman',
+    description: 'Menggunakan standar keamanan terbaik.'
+  },
+  {
+    icon: <Smartphone className="w-5 h-5 text-[#22D3EE]" />,
+    title: 'Responsif',
+    description: 'Nyaman di HP, Tablet, maupun Laptop.'
+  },
+  {
+    icon: <Cpu className="w-5 h-5 text-[#22D3EE]" />,
+    title: 'Siap Berkembang',
+    description: 'Mudah dikembangkan ketika bisnis semakin besar.'
+  }
+];
+
 export default function WhySection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-80px' });
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  // useMotionValue avoids React re-renders on every mouse move event
+  const rawX = useMotionValue(0);
+  const rawY = useMotionValue(0);
+  const smoothX = useSpring(rawX, { stiffness: 100, damping: 25 });
+  const smoothY = useSpring(rawY, { stiffness: 100, damping: 25 });
+
+  // Derive parallax offsets without re-rendering
+  const glow1X  = useTransform(smoothX, v => v * 24);
+  const glow1Y  = useTransform(smoothY, v => v * 24);
+  const glow2X  = useTransform(smoothX, v => v * -20);
+  const glow2Y  = useTransform(smoothY, v => v * -20);
+  const visualX = useTransform(smoothX, v => v * -12);
+  const visualY = useTransform(smoothY, v => v * -12);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!sectionRef.current) return;
     const rect = sectionRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
-    const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
-    setMousePos({ x, y });
+    rawX.set((e.clientX - rect.left - rect.width / 2) / (rect.width / 2));
+    rawY.set((e.clientY - rect.top - rect.height / 2) / (rect.height / 2));
   };
 
   const handleMouseLeave = () => {
-    setMousePos({ x: 0, y: 0 });
+    rawX.set(0);
+    rawY.set(0);
   };
-
-  const featureCards = [
-    {
-      icon: <Zap className="w-5 h-5 text-[#22D3EE]" />,
-      title: 'Cepat',
-      description: 'Website ringan dan loading cepat.'
-    },
-    {
-      icon: <Shield className="w-5 h-5 text-[#22D3EE]" />,
-      title: 'Aman',
-      description: 'Menggunakan standar keamanan terbaik.'
-    },
-    {
-      icon: <Smartphone className="w-5 h-5 text-[#22D3EE]" />,
-      title: 'Responsif',
-      description: 'Nyaman di HP, Tablet, maupun Laptop.'
-    },
-    {
-      icon: <Cpu className="w-5 h-5 text-[#22D3EE]" />,
-      title: 'Siap Berkembang',
-      description: 'Mudah dikembangkan ketika bisnis semakin besar.'
-    }
-  ];
 
   const containerVariants = {
     hidden: {},
@@ -195,25 +207,17 @@ export default function WhySection() {
       ref={sectionRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className="py-28 relative overflow-hidden bg-[#050505] border-t border-white/8"
+      className="py-20 sm:py-28 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
       {/* Ambient background glows with mouse parallax */}
       <div className="absolute inset-0 pointer-events-none -z-10">
         <motion.div 
-          animate={{
-            x: mousePos.x * 24,
-            y: mousePos.y * 24
-          }}
-          transition={{ type: 'spring', stiffness: 100, damping: 25 }}
-          className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(34,211,238,0.025)_0%,transparent_75%)] blur-3xl" 
+          style={{ x: glow1X, y: glow1Y }}
+          className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-[radial-gradient(ellipse,rgba(34,211,238,0.025)_0%,rgba(34,211,238,0.007)_40%,transparent_75%)]" 
         />
         <motion.div 
-          animate={{
-            x: mousePos.x * -20,
-            y: mousePos.y * -20
-          }}
-          transition={{ type: 'spring', stiffness: 100, damping: 25 }}
-          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.015)_0%,transparent_75%)] blur-3xl" 
+          style={{ x: glow2X, y: glow2Y }}
+          className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-[radial-gradient(ellipse,rgba(99,102,241,0.015)_0%,rgba(99,102,241,0.004)_40%,transparent_75%)]" 
         />
       </div>
 
@@ -235,12 +239,8 @@ export default function WhySection() {
 
             {/* Inner div for mouse parallax */}
             <motion.div
-              animate={{
-                x: mousePos.x * -12,
-                y: mousePos.y * -12
-              }}
-              transition={{ type: 'spring', stiffness: 100, damping: 25 } as any}
-              className="w-full will-change-transform"
+              style={{ x: visualX, y: visualY }}
+              className="w-full"
             >
               {/* Custom Interactive Mockup Canvas */}
               <MorphingVisual />
@@ -282,7 +282,6 @@ export default function WhySection() {
                   }}
                   transition={{ type: 'spring', stiffness: 350, damping: 20 }}
                   className="group p-5 rounded-2xl bg-[#0B0B0B] border border-white/6 flex gap-4 items-start relative overflow-hidden transition-all duration-300"
-                  style={{ willChange: 'transform' }}
                 >
                   {/* Subtle top hover line glow */}
                   <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#22D3EE]/0 to-transparent group-hover:via-[#22D3EE]/30 transition-all duration-500" />

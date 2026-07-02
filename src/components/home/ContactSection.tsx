@@ -49,9 +49,9 @@ export default function ContactSection() {
     >
       {/* Background glows */}
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.03) 0%, transparent 70%)', filter: 'blur(100px)' }} />
+        style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.03) 0%, rgba(34,211,238,0.007) 40%, transparent 70%)' }} />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.03) 0%, transparent 70%)', filter: 'blur(100px)' }} />
+        style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.03) 0%, rgba(167,139,250,0.007) 40%, transparent 70%)' }} />
 
       <div className="container relative z-10">
 
@@ -92,20 +92,17 @@ export default function ContactSection() {
             >
               <motion.button
                 onClick={() => handleOpenWhatsApp(admin.phone)}
-                whileHover={{ scale: 1.03, y: -4 }}
+                whileHover={{ 
+                  scale: 1.03, 
+                  y: -4,
+                  borderColor: `${admin.color}40`,
+                  boxShadow: `0 0 24px ${admin.color}15, 0 8px 32px rgba(0,0,0,0.4)`
+                }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full text-left p-6 rounded-2xl cursor-pointer group transition-all duration-300"
+                className="w-full text-left p-6 rounded-2xl cursor-pointer group transition-colors duration-300"
                 style={{
                   background: '#0B0B0B',
                   border: '1px solid rgba(255,255,255,0.08)',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = `${admin.color}40`;
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 24px ${admin.color}15, 0 8px 32px rgba(0,0,0,0.4)`;
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.08)';
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none';
                 }}
               >
                 {/* Avatar + Name */}
@@ -155,25 +152,25 @@ export default function ContactSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.25, ease: EASE }}
-          className="flex flex-wrap justify-center gap-6 mb-10"
+          className="flex flex-wrap justify-center gap-4 mb-10 contact-info-pills"
         >
           {/* Hours */}
-          <div className="flex items-center gap-2.5 px-5 py-3 rounded-xl"
+          <div className="flex items-center gap-2.5 px-5 py-3 rounded-xl flex-1 sm:flex-none min-w-0"
             style={{ background: '#0B0B0B', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <Clock className="w-4 h-4" style={{ color: '#22D3EE' }} />
-            <div>
+            <Clock className="w-4 h-4 shrink-0" style={{ color: '#22D3EE' }} />
+            <div className="min-w-0">
               <div className="text-[10px] uppercase tracking-widest font-medium" style={{ color: '#B5B5B5' }}>{t('contact.hours_label')}</div>
-              <div className="text-xs font-semibold text-white">{t('contact.hours_value')}</div>
+              <div className="text-xs font-semibold text-white truncate">{t('contact.hours_value')}</div>
             </div>
           </div>
 
           {/* Response time */}
-          <div className="flex items-center gap-2.5 px-5 py-3 rounded-xl"
+          <div className="flex items-center gap-2.5 px-5 py-3 rounded-xl flex-1 sm:flex-none min-w-0"
             style={{ background: '#0B0B0B', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <Phone className="w-4 h-4" style={{ color: '#10B981' }} />
-            <div>
+            <Phone className="w-4 h-4 shrink-0" style={{ color: '#10B981' }} />
+            <div className="min-w-0">
               <div className="text-[10px] uppercase tracking-widest font-medium" style={{ color: '#B5B5B5' }}>{t('contact.response_label')}</div>
-              <div className="text-xs font-semibold text-white">{t('contact.response_value')}</div>
+              <div className="text-xs font-semibold text-white truncate">{t('contact.response_value')}</div>
             </div>
           </div>
         </motion.div>

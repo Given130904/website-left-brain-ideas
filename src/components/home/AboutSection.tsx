@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, useMotionValue, useSpring, useTransform, useInView } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Badge from '../ui/Badge';
@@ -7,25 +7,30 @@ import { Cpu, Sparkles, Layers } from 'lucide-react';
 const EASE = [0.16, 1, 0.3, 1] as any;
 
 function CountUp({ end, duration = 1.5 }: { end: number; duration?: number }) {
-  const [count, setCount] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
 
   useEffect(() => {
     if (!isInView) return;
     let startTimestamp: number | null = null;
+    let animId: number;
     const step = (timestamp: number) => {
       if (!startTimestamp) startTimestamp = timestamp;
       const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
-      setCount(Math.floor(progress * end));
+      if (ref.current) {
+        ref.current.textContent = String(Math.floor(progress * end));
+      }
       if (progress < 1) {
-        window.requestAnimationFrame(step);
+        animId = window.requestAnimationFrame(step);
       }
     };
-    window.requestAnimationFrame(step);
+    animId = window.requestAnimationFrame(step);
+    return () => {
+      if (animId) window.cancelAnimationFrame(animId);
+    };
   }, [isInView, end, duration]);
 
-  return <span ref={ref}>{count}</span>;
+  return <span ref={ref}>0</span>;
 }
 
 interface IdentityPanelProps {
@@ -41,7 +46,6 @@ interface IdentityPanelProps {
 
 function IdentityPanel({ title, desc, icon, accentColor, glowColor, visualOverlay, index, isInView }: IdentityPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
 
   // Parallax spring-tilt coordinates (subtle ±4deg limit)
   const x = useMotionValue(0);
@@ -61,37 +65,26 @@ function IdentityPanel({ title, desc, icon, accentColor, glowColor, visualOverla
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
-    setIsHovered(false);
-  };
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
   };
 
   return (
     <motion.div
       ref={panelRef}
       onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
         rotateX,
         rotateY,
         transformStyle: 'preserve-3d',
-        willChange: 'transform, opacity',
-      }}
+        '--accent-color': accentColor,
+        '--glow-color': glowColor,
+      } as any}
       // Idle float (pauses on hover or out of viewport)
-      animate={
-        isHovered 
-          ? { y: -8 } 
-          : isInView 
-            ? { y: [0, -4, 0] } 
-            : { y: 0 }
-      }
+      animate={isInView ? { y: [0, -4, 0] } : { y: 0 }}
+      whileHover={{ y: -8 }}
       transition={
-        isHovered 
-          ? { duration: 0.3, ease: EASE } 
-          : {
+        isInView 
+          ? {
               y: {
                 repeat: Infinity,
                 duration: 6,
@@ -99,26 +92,21 @@ function IdentityPanel({ title, desc, icon, accentColor, glowColor, visualOverla
                 delay: index * 0.5,
               }
             }
+          : {}
       }
-      className="relative flex-1 w-full rounded-[24px] bg-neutral-900/40 backdrop-blur-xl border border-white/8 p-8 transition-colors duration-500 overflow-hidden flex flex-col justify-between min-h-[360px] group text-left"
+      className="relative flex-1 w-full rounded-[24px] bg-neutral-900/40 backdrop-blur-xl border border-white/8 p-6 sm:p-8 transition-colors duration-500 overflow-hidden flex flex-col justify-between min-h-[280px] sm:min-h-[360px] group text-left"
     >
       {/* High-performance glowing shadow backdrop element */}
       <div 
-        className="absolute inset-0 rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none -z-10 blur-2xl"
+        className="absolute inset-0 rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none -z-10 bg-[radial-gradient(circle,var(--glow-color)_0%,transparent_70%)]"
         style={{ 
-          backgroundColor: glowColor,
-          boxShadow: `0 0 45px -5px ${glowColor}`,
-          willChange: 'opacity'
+          boxShadow: `0 0 45px -5px var(--glow-color)`,
         }}
       />
       
       {/* High-performance border glow element */}
       <div 
-        className="absolute inset-0 rounded-[24px] border opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{ 
-          borderColor: accentColor,
-          willChange: 'opacity'
-        }}
+        className="absolute inset-0 rounded-[24px] border border-transparent opacity-0 group-hover:opacity-100 group-hover:border-[var(--accent-color)] transition-all duration-500 pointer-events-none"
       />
 
       {/* Embedded Visual Showcase backdrop */}
@@ -127,15 +115,11 @@ function IdentityPanel({ title, desc, icon, accentColor, glowColor, visualOverla
       </div>
 
       {/* Content */}
-      <div className="relative z-10" style={{ transform: 'translateZ(15px)', willChange: 'transform' }}>
+      <div className="relative z-10" style={{ transform: 'translateZ(15px)' }}>
         <div 
-          className="w-10 h-10 rounded-xl bg-white/3 border border-white/5 flex items-center justify-center shrink-0 mb-6 transition-all duration-300"
-          style={{
-            borderColor: isHovered ? accentColor : 'rgba(255,255,255,0.05)',
-            boxShadow: isHovered ? `0 0 12px ${accentColor}` : 'none',
-          }}
+          className="w-10 h-10 rounded-xl bg-white/3 border border-white/5 flex items-center justify-center shrink-0 mb-6 transition-all duration-300 group-hover:border-[var(--accent-color)] group-hover:shadow-[0_0_12px_var(--accent-color)]"
         >
-          <div style={{ color: isHovered ? '#FFFFFF' : accentColor }}>
+          <div className="text-[var(--accent-color)] group-hover:text-white transition-colors duration-300">
             {icon}
           </div>
         </div>
@@ -183,16 +167,16 @@ export default function AboutSection() {
     <section
       id="about"
       ref={sectionRef}
-      className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8"
+      className="py-20 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
-      {/* Dynamic ambient highlights */}
-      <div className="absolute top-[20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.025)_0%,transparent_70%)] filter blur-[110px] pointer-events-none -z-10 animate-pulse-glow" />
-      <div className="absolute bottom-[20%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.015)_0%,transparent_70%)] filter blur-[110px] pointer-events-none -z-10" />
+      {/* Ambient highlights — static opacity, no continuous animation */}
+      <div className="absolute top-[20%] left-[-10%] w-[400px] h-[400px] rounded-full pointer-events-none -z-10 opacity-60" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.04) 0%, rgba(34,211,238,0.01) 40%, transparent 70%)' }} />
+      <div className="absolute bottom-[20%] right-[-10%] w-[400px] h-[400px] rounded-full pointer-events-none -z-10 opacity-50" style={{ background: 'radial-gradient(circle, rgba(236,72,153,0.03) 0%, rgba(236,72,153,0.007) 40%, transparent 70%)' }} />
 
-      {/* Floating background particles */}
+      {/* Floating background particles — viewport gated */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className={`absolute top-[25%] left-[20%] w-2 h-2 rounded-full bg-cyan-400/20 filter blur-xs ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '8s', animationDelay: '0s' }} />
-        <div className={`absolute bottom-[25%] right-[20%] w-3 h-3 rounded-full bg-pink-500/10 filter blur-[1px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '12s', animationDelay: '2s' }} />
+        <div className={`absolute top-[25%] left-[20%] w-2 h-2 rounded-full bg-cyan-400/15 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '8s', animationDelay: '0s' }} />
+        <div className={`absolute bottom-[25%] right-[20%] w-3 h-3 rounded-full bg-pink-500/8 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '12s', animationDelay: '2s' }} />
       </div>
 
       <div className="container relative z-10 max-w-[1140px] mx-auto px-6">
@@ -277,7 +261,7 @@ export default function AboutSection() {
               visualOverlay={
                 <div className="absolute inset-0 flex items-center justify-center p-6 select-none opacity-40">
                   {/* Visual Glassmorphic Pulsing Blobs */}
-                  <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-pink-500/10 via-purple-500/10 to-blue-500/10 blur-xl animate-pulse" style={{ animationDuration: '4s' }} />
+                  <div className="w-32 h-32 rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.1)_0%,rgba(168,85,247,0.1)_40%,transparent_70%)] animate-pulse" style={{ animationDuration: '4s' }} />
                   <div className="absolute w-24 h-24 rounded-full border border-pink-500/10 backdrop-blur-sm" />
                   <div className="absolute w-16 h-16 rounded-full border border-purple-500/15" />
                 </div>
@@ -338,7 +322,6 @@ export default function AboutSection() {
             boxShadow: '0 15px 40px rgba(167, 139, 250, 0.04), inset 0 0 12px rgba(255, 255, 255, 0.02)'
           }}
           className="group relative rounded-[24px] bg-neutral-950/45 border border-white/8 p-8 flex flex-col md:flex-row gap-6 items-start md:items-center text-left transition-all duration-300"
-          style={{ willChange: 'transform' }}
         >
           {/* Accent glow top line */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#A78BFA] to-transparent opacity-0 group-hover:opacity-40 transition-opacity duration-500" />

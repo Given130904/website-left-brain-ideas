@@ -86,23 +86,23 @@ export default function Footer() {
         <div 
           className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40"
         />
-        {/* Subtle floating particles */}
-        {Array.from({ length: 5 }).map((_, i) => (
+        {/* Subtle floating particles — positions fixed to avoid Math.random in render */}
+        {[15, 33, 51, 69, 87].map((leftPos, i) => (
           <motion.div
             key={i}
-            initial={{ y: 200, opacity: 0, x: Math.random() * 800 }}
+            initial={{ y: 200, opacity: 0, x: 0 }}
             animate={{
               y: -100,
               opacity: [0, 0.35, 0],
             }}
             transition={{
-              duration: 8 + Math.random() * 6,
+              duration: 8 + i * 1.5,
               repeat: Infinity,
               ease: 'linear',
               delay: i * 2.2,
             }}
-            className="absolute w-1 h-1 rounded-full bg-[#22D3EE]/30 blur-[0.5px]"
-            style={{ left: `${15 + i * 18}%` }}
+            className="absolute w-1 h-1 rounded-full bg-[#22D3EE]/30"
+            style={{ left: `${leftPos}%` }}
           />
         ))}
       </div>
@@ -198,7 +198,7 @@ export default function Footer() {
             </h4>
             
             {/* WhatsApp Buttons */}
-            <div className="flex flex-col gap-2.5 w-full max-w-[240px]">
+            <div className="flex flex-col gap-2.5 w-full">
               <a
                 href={getWhatsAppLink(admin1)}
                 target="_blank"
@@ -227,7 +227,7 @@ export default function Footer() {
             </div>
 
             {/* Business Hours & Response Metrics */}
-            <div className="flex flex-col gap-3 pt-2 text-[#B5B5B5] border-t border-white/5 w-full max-w-[240px]">
+            <div className="flex flex-col gap-3 pt-2 text-[#B5B5B5] border-t border-white/5 w-full">
               <div className="flex items-center gap-2.5">
                 <Clock className="w-4 h-4 text-[#22D3EE] shrink-0" />
                 <div className="flex flex-col text-left">

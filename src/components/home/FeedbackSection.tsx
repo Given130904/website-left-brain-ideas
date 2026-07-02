@@ -4,29 +4,27 @@ import { useTranslation } from 'react-i18next';
 import { Star } from 'lucide-react';
 
 const EASE = [0.16, 1, 0.3, 1] as any;
+const RATINGS = Array.from({ length: 10 }, (_, i) => i + 1);
 
 export default function FeedbackSection() {
   const { t } = useTranslation();
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const [hoveredRating, setHoveredRating] = useState<number | null>(null);
 
-  const ratings = Array.from({ length: 10 }, (_, i) => i + 1);
-
   return (
     <section 
       id="feedback" 
       className="py-20 md:py-24 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.015)_0%,transparent_75%)] filter blur-[90px] pointer-events-none -z-10" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.015)_0%,rgba(34,211,238,0.004)_40%,transparent_75%)] pointer-events-none -z-10" />
 
       <div className="container relative z-10 max-w-2xl mx-auto px-6">
         <motion.div
           layout
           className="p-8 md:p-10 rounded-3xl bg-[#0B0B0B] border border-white/8 text-center relative overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-          style={{ willChange: 'transform' }}
         >
           {/* Subtle top border cyan glow line */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-[1px] bg-[#22D3EE]/30 blur-[0.5px]" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-[1px] bg-[#22D3EE]/30" />
 
           <AnimatePresence mode="wait">
             {selectedRating === null ? (
@@ -50,7 +48,7 @@ export default function FeedbackSection() {
 
                 {/* Rating Numbers Grid */}
                 <div className="flex flex-wrap justify-center gap-2.5 sm:gap-3 w-full">
-                  {ratings.map((num) => {
+                  {RATINGS.map((num) => {
                     const isHovered = hoveredRating !== null && num <= hoveredRating;
                     return (
                       <motion.button
@@ -70,7 +68,6 @@ export default function FeedbackSection() {
                           boxShadow: isHovered 
                             ? '0 0 16px rgba(34, 211, 238, 0.25), inset 0 0 8px rgba(34, 211, 238, 0.1)'
                             : 'none',
-                          willChange: 'transform'
                         }}
                       >
                         {num}

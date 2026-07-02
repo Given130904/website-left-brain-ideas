@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   Globe,
@@ -33,7 +34,7 @@ const serviceCardVariants = {
 export default function ServicesSection() {
   const { t } = useTranslation();
 
-  const services = [
+  const services = useMemo(() => [
     {
       title: t('services.items.custom_app.title'),
       description: t('services.items.custom_app.desc'),
@@ -98,7 +99,7 @@ export default function ServicesSection() {
       featured: false,
       category: t('services.engineering'),
     },
-  ];
+  ], [t]);
 
   const [featured, ...rest] = services;
 
@@ -108,8 +109,8 @@ export default function ServicesSection() {
       className="py-24 md:py-32 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
       {/* Background glows */}
-      <div className="absolute top-[10%] left-[5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,transparent_70%)] filter blur-[90px] pointer-events-none -z-10" />
-      <div className="absolute bottom-[10%] right-[5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.01)_0%,transparent_70%)] filter blur-[90px] pointer-events-none -z-10" />
+      <div className="absolute top-[10%] left-[5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02) 0%,rgba(34,211,238,0.005) 45%,transparent 70%)] pointer-events-none -z-10" />
+      <div className="absolute bottom-[10%] right-[5%] w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.01) 0%,transparent 70%)] pointer-events-none -z-10" />
 
       <div className="container relative z-10">
 
@@ -141,7 +142,7 @@ export default function ServicesSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-80px' }}
           transition={{ duration: 0.7, ease: EASE }}
-          className="mb-5 group relative rounded-2xl overflow-hidden cursor-default text-left mx-6 lg:mx-0"
+          className="mb-5 group relative rounded-2xl overflow-hidden cursor-default text-left"
           style={{
             background: '#0B0B0B',
             border: '1px solid rgba(34, 211, 238, 0.12)',
@@ -185,7 +186,7 @@ export default function ServicesSection() {
         </motion.div>
 
         {/* 4-column grid for rest */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 px-6 lg:px-0 text-left">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-left">
           {rest.map((service, idx) => (
             <motion.div
               key={service.title}
@@ -201,7 +202,6 @@ export default function ServicesSection() {
                 background: '#0B0B0B',
                 border: '1px solid rgba(255,255,255,0.08)',
                 backdropFilter: 'blur(12px)',
-                willChange: 'transform'
               }}
             >
               {/* Top hover accent */}

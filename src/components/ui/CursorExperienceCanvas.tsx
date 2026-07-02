@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface CursorObject {
   id: number;
@@ -32,17 +32,365 @@ const OBJECT_TYPES = [
   'binary', 'shield', 'cpu_chip', 'neural_nodes', 'light_bulb'
 ];
 
-export default function CursorExperienceCanvas() {
+function CursorExperienceCanvasContent() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const mouseRef = useRef({ x: -1000, y: -1000, vx: 0, vy: 0, lastX: 0, lastY: 0 });
   const hoverRef = useRef<HoverState>({ type: 'none', x: 0, y: 0, width: 0, height: 0 });
   const lastMoveTimeRef = useRef(Date.now());
-  const logoTimerRef = useRef({ lastTrigger: Date.now(), state: 'idle', progress: 0 });
 
-  // Handle pointer tracking
+  // Single merged useEffect for pointer tracking and canvas draw loop
   useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let isLoopRunning = false; // Start paused, will resume on first mouse move!
+    let lastDrawTime = Date.now();
+    const fps = 30;
+    const fpsInterval = 1000 / fps;
+
+    let objectIdCounter = 0;
+    let dpr = 1;
+
+    // Object pool to avoid dynamic memory allocation during rendering
+    const MAX_OBJECTS = 30;
+    const pool: (CursorObject & { active: boolean })[] = Array.from({ length: MAX_OBJECTS }, () => ({
+      id: -1,
+      type: '',
+      x: 0,
+      y: 0,
+      vx: 0,
+      vy: 0,
+      size: 0,
+      depth: 0,
+      rotation: 0,
+      rotSpeed: 0,
+      opacity: 0,
+      targetOpacity: 0,
+      age: 0,
+      maxAge: 0,
+      pulsePhase: 0,
+      sparkProgress: 0,
+      active: false
+    }));
+
+    // Cache Path2D shapes to avoid recreating them in loop
+    const shapes: Record<string, Path2D> = {};
+
+    const pKeyboard = new Path2D();
+    pKeyboard.rect(-10, -10, 20, 20);
+    pKeyboard.rect(-6, -6, 12, 12);
+    shapes['keyboard_corner'] = pKeyboard;
+
+    const pWasd = new Path2D();
+    const ks = 8;
+    pWasd.rect(-ks/2, -ks*1.2, ks, ks);
+    pWasd.rect(-ks*1.1, 0, ks, ks);
+    pWasd.rect(-ks/2, 0, ks, ks);
+    pWasd.rect(ks*0.1, 0, ks, ks);
+    shapes['wasd'] = pWasd;
+
+    const pEsc = new Path2D();
+    pEsc.rect(-12, -10, 24, 20);
+    shapes['esc_key'] = pEsc;
+
+    const pShield = new Path2D();
+    pShield.moveTo(0, -11);
+    pShield.lineTo(10, -7);
+    pShield.lineTo(10, 2);
+    pShield.quadraticCurveTo(10, 10, 0, 12);
+    pShield.quadraticCurveTo(-10, 10, -10, 2);
+    pShield.lineTo(-10, -7);
+    pShield.closePath();
+    shapes['shield'] = pShield;
+
+    const pCpu = new Path2D();
+    pCpu.rect(-11, -11, 22, 22);
+    pCpu.rect(-7, -7, 14, 14);
+    for (let i = -8; i <= 8; i += 4) {
+      pCpu.rect(i - 1, -14, 2, 3);
+      pCpu.rect(i - 1, 11, 2, 3);
+      pCpu.rect(-14, i - 1, 3, 2);
+      pCpu.rect(11, i - 1, 3, 2);
+    }
+    shapes['cpu_chip'] = pCpu;
+
+    const pNeural = new Path2D();
+    pNeural.moveTo(-8, 6);
+    pNeural.lineTo(8, 6);
+    pNeural.lineTo(0, -8);
+    pNeural.closePath();
+    pNeural.moveTo(-8 + 2, 6);
+    pNeural.arc(-8, 6, 2, 0, Math.PI * 2);
+    pNeural.moveTo(8 + 2, 6);
+    pNeural.arc(8, 6, 2, 0, Math.PI * 2);
+    pNeural.moveTo(0 + 2, -8);
+    pNeural.arc(0, -8, 2, 0, Math.PI * 2);
+    shapes['neural_nodes'] = pNeural;
+
+    const pBulb = new Path2D();
+    pBulb.arc(0, -4, 8, 0, Math.PI * 2);
+    pBulb.rect(-4, 4, 8, 4);
+    pBulb.moveTo(-3, -3);
+    pBulb.lineTo(0, -7);
+    pBulb.lineTo(3, -3);
+    shapes['light_bulb'] = pBulb;
+
+    // Cache static text into offscreen canvases to avoid fillText() calls
+    const createTextCanvas = (text: string, font: string, style: string) => {
+      const offscreen = document.createElement('canvas');
+      offscreen.width = 40;
+      offscreen.height = 15;
+      const oCtx = offscreen.getContext('2d');
+      if (oCtx) {
+        oCtx.font = font;
+        oCtx.fillStyle = style;
+        oCtx.textBaseline = 'top';
+        oCtx.fillText(text, 0, 0);
+      }
+      return offscreen;
+    };
+
+    const escText = createTextCanvas('ESC', '6px monospace', 'rgba(255, 255, 255, 0.7)');
+    const bracketsText = createTextCanvas('</>', 'bold 11px monospace', 'rgba(34, 211, 238, 0.8)');
+    const binary010Text = createTextCanvas('010', '8px monospace', 'rgba(99, 102, 241, 0.75)');
+    const binary101Text = createTextCanvas('101', '8px monospace', 'rgba(99, 102, 241, 0.75)');
+
+    const resize = () => {
+      if (!canvas || !containerRef.current) return;
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      ctx.scale(dpr, dpr);
+    };
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    const spawnObject = (mx: number, my: number) => {
+      let obj = null;
+      for (let i = 0; i < MAX_OBJECTS; i++) {
+        if (!pool[i].active) {
+          obj = pool[i];
+          break;
+        }
+      }
+      if (!obj) return;
+
+      const type = OBJECT_TYPES[Math.floor(Math.random() * OBJECT_TYPES.length)];
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 60 + Math.random() * 80;
+
+      obj.id = objectIdCounter++;
+      obj.type = type;
+      obj.x = mx + Math.cos(angle) * distance;
+      obj.y = my + Math.sin(angle) * distance;
+      obj.vx = (Math.random() - 0.5) * 0.8;
+      obj.vy = (Math.random() - 0.5) * 0.8;
+      obj.size = 12 + Math.random() * 10;
+      obj.depth = 0.6 + Math.random() * 0.9;
+      obj.rotation = Math.random() * Math.PI;
+      obj.rotSpeed = (Math.random() - 0.5) * 0.015;
+      obj.opacity = 0;
+      obj.targetOpacity = 1;
+      obj.age = 0;
+      obj.maxAge = 280 + Math.random() * 160;
+      obj.pulsePhase = Math.random() * Math.PI * 2;
+      obj.sparkProgress = 0;
+      obj.active = true;
+    };
+
+    const drawObject = (c: CanvasRenderingContext2D, o: CursorObject) => {
+      // Avoid c.save() / c.restore() using direct setTransform matrix
+      const cos = Math.cos(o.rotation);
+      const sin = Math.sin(o.rotation);
+      const s = o.depth * dpr;
+
+      c.setTransform(
+        cos * s,
+        sin * s,
+        -sin * s,
+        cos * s,
+        o.x * dpr,
+        o.y * dpr
+      );
+      
+      c.strokeStyle = `rgba(34, 211, 238, ${o.opacity})`;
+      c.fillStyle = `rgba(34, 211, 238, ${o.opacity * 0.05})`;
+      c.lineWidth = 1;
+
+      const path = shapes[o.type];
+      if (path) {
+        c.stroke(path);
+        if (o.type === 'shield' || o.type === 'cpu_chip' || o.type === 'neural_nodes') {
+          c.fill(path);
+        }
+      }
+
+      // Handle offscreen label texts drawing
+      if (o.type === 'esc_key') {
+        c.globalAlpha = o.opacity;
+        c.drawImage(escText, -6, -4);
+        c.globalAlpha = 1.0;
+      } else if (o.type === 'code_brackets') {
+        c.globalAlpha = o.opacity;
+        c.drawImage(bracketsText, -10, -5);
+        c.globalAlpha = 1.0;
+      } else if (o.type === 'binary') {
+        c.globalAlpha = o.opacity;
+        c.drawImage(Math.random() > 0.5 ? binary101Text : binary010Text, -10, -4);
+        c.globalAlpha = 1.0;
+      }
+
+      // Reset transform back to standard scaled coordinates
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    const tick = () => {
+      if (!isLoopRunning) return;
+
+      const now = Date.now();
+      const mouse = mouseRef.current;
+      const hover = hoverRef.current;
+
+      const isInactive = now - lastMoveTimeRef.current > 2000;
+      
+      // Determine if there are active objects left
+      let activeCount = 0;
+      for (let i = 0; i < MAX_OBJECTS; i++) {
+        if (pool[i].active) activeCount++;
+      }
+
+      // If inactive and no active objects, stop loop completely!
+      if (isInactive && activeCount === 0) {
+        isLoopRunning = false;
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
+        return;
+      }
+
+      const elapsed = now - lastDrawTime;
+      if (elapsed >= fpsInterval) {
+        lastDrawTime = now - (elapsed % fpsInterval);
+
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        if (mouse.x > -500 && !isInactive && activeCount < 5 && Math.random() < 0.04) {
+          spawnObject(mouse.x, mouse.y);
+        }
+
+        for (let i = 0; i < MAX_OBJECTS; i++) {
+          const o = pool[i];
+          if (!o.active) continue;
+
+          o.age++;
+
+          if (o.age > o.maxAge || isInactive) {
+            o.targetOpacity = 0;
+          }
+
+          o.opacity += (o.targetOpacity - o.opacity) * 0.06;
+
+          if (o.opacity <= 0.01 && o.targetOpacity === 0) {
+            o.active = false;
+            continue;
+          }
+
+          const dx = mouse.x - o.x;
+          const dy = mouse.y - o.y;
+          // Squared-distance comparison instead of Math.sqrt
+          const distSq = dx * dx + dy * dy;
+
+          if (distSq > 16900) { // 130 * 130
+            const force = 0.0004 * o.depth;
+            o.vx += dx * force;
+            o.vy += dy * force;
+          } else if (distSq < 3025) { // 55 * 55
+            const force = 0.008 / o.depth;
+            o.vx -= dx * force;
+            o.vy -= dy * force;
+          }
+
+          o.vx *= 0.94;
+          o.vy *= 0.94;
+
+          o.x += o.vx;
+          o.y += o.vy;
+          o.rotation += o.rotSpeed;
+
+          if (hover.type !== 'none') {
+            o.opacity = Math.min(o.opacity * 1.1, 1);
+          }
+
+          for (let j = i + 1; j < MAX_OBJECTS; j++) {
+            const o2 = pool[j];
+            if (!o2.active) continue;
+
+            const odx = o.x - o2.x;
+            const ody = o.y - o2.y;
+            // Squared-distance check
+            const odistSq = odx * odx + ody * ody;
+
+            if (odistSq < 7225) { // 85 * 85
+              const odist = Math.sqrt(odistSq);
+              ctx.shadowBlur = 0;
+              ctx.beginPath();
+              ctx.moveTo(o.x, o.y);
+              ctx.lineTo(o2.x, o2.y);
+              const lineOpacity = (1 - odist / 85) * 0.08 * o.opacity * o2.opacity;
+              ctx.strokeStyle = `rgba(34, 211, 238, ${lineOpacity})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+
+          ctx.shadowColor = 'rgba(34, 211, 238, 0.6)';
+          ctx.shadowBlur = 6;
+          drawObject(ctx, o);
+          ctx.shadowBlur = 0;
+        }
+
+        if (hover.type === 'portfolio' && mouse.x > -500) {
+          ctx.strokeStyle = `rgba(34, 211, 238, 0.15)`;
+          ctx.strokeRect(mouse.x + 20, mouse.y - 30, 45, 30);
+          ctx.beginPath();
+          ctx.moveTo(mouse.x + 20, mouse.y - 23);
+          ctx.lineTo(mouse.x + 65, mouse.y - 23);
+          ctx.stroke();
+        } else if (hover.type === 'service' && mouse.x > -500) {
+          ctx.beginPath();
+          ctx.moveTo(mouse.x, mouse.y);
+          ctx.lineTo(hover.x + hover.width / 2, hover.y + hover.height / 2);
+          ctx.strokeStyle = `rgba(34, 211, 238, 0.08)`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        } else if (hover.type === 'button' && mouse.x > -500) {
+          ctx.beginPath();
+          ctx.arc(mouse.x, mouse.y, 25, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(34, 211, 238, 0.05)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+
+      animationId = requestAnimationFrame(tick);
+    };
+
+    const resumeLoop = () => {
+      if (!isLoopRunning) {
+        isLoopRunning = true;
+        lastDrawTime = Date.now();
+        animationId = requestAnimationFrame(tick);
+      }
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
       const mouse = mouseRef.current;
       mouse.vx = e.clientX - mouse.lastX;
@@ -53,6 +401,7 @@ export default function CursorExperienceCanvas() {
       mouse.lastY = e.clientY;
       
       lastMoveTimeRef.current = Date.now();
+      resumeLoop();
     };
 
     const handleMouseOver = (e: MouseEvent) => {
@@ -75,402 +424,41 @@ export default function CursorExperienceCanvas() {
       } else {
         hoverRef.current = { type: 'none', x: 0, y: 0, width: 0, height: 0 };
       }
+      resumeLoop();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isLoopRunning = false;
+        cancelAnimationFrame(animationId);
+      } else {
+        const isInactive = Date.now() - lastMoveTimeRef.current > 2000;
+        let activeCount = 0;
+        for (let i = 0; i < MAX_OBJECTS; i++) {
+          if (pool[i].active) activeCount++;
+        }
+        if (!isInactive || activeCount > 0) {
+          resumeLoop();
+        }
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('mouseover', handleMouseOver, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Initial check
+    if (mouseRef.current.x > -500) {
+      resumeLoop();
+    }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseover', handleMouseOver);
-    };
-  }, []);
-
-  // Main canvas draw loop
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animationId: number;
-    let objects: CursorObject[] = [];
-    let objectIdCounter = 0;
-
-    const resize = () => {
-      if (!canvas || !containerRef.current) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      ctx.scale(dpr, dpr);
-    };
-
-    window.addEventListener('resize', resize);
-    resize();
-
-    // Spawn helper
-    const spawnObject = (mx: number, my: number) => {
-      const type = OBJECT_TYPES[Math.floor(Math.random() * OBJECT_TYPES.length)];
-      const angle = Math.random() * Math.PI * 2;
-      const distance = 60 + Math.random() * 90;
-      
-      objects.push({
-        id: objectIdCounter++,
-        type,
-        x: mx + Math.cos(angle) * distance,
-        y: my + Math.sin(angle) * distance,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
-        size: 14 + Math.random() * 12,
-        depth: 0.6 + Math.random() * 0.9, // 3D depth scale multiplier
-        rotation: Math.random() * Math.PI,
-        rotSpeed: (Math.random() - 0.5) * 0.015,
-        opacity: 0,
-        targetOpacity: 1,
-        age: 0,
-        maxAge: 320 + Math.random() * 180,
-        pulsePhase: Math.random() * Math.PI * 2,
-        sparkProgress: 0
-      });
-    };
-
-    // Vector drawing functions for cyber-objects
-    const drawObject = (c: CanvasRenderingContext2D, o: CursorObject) => {
-      c.save();
-      c.translate(o.x, o.y);
-      c.rotate(o.rotation);
-      c.scale(o.depth, o.depth);
-      
-      c.strokeStyle = `rgba(34, 211, 238, ${o.opacity})`;
-      c.fillStyle = `rgba(34, 211, 238, ${o.opacity * 0.05})`;
-      c.lineWidth = 1;
-      
-      // Glow drop shadow effect
-      c.shadowColor = 'rgb(34, 211, 238)';
-      c.shadowBlur = 8 * o.depth;
-
-      switch (o.type) {
-        case 'keyboard_corner': {
-          c.beginPath();
-          c.rect(-10, -10, 20, 20);
-          c.stroke();
-          // Draw inner key segment
-          c.strokeRect(-6, -6, 12, 12);
-          break;
-        }
-        case 'wasd': {
-          // Draw 4 layout keys
-          const ks = 8;
-          c.strokeRect(-ks/2, -ks*1.2, ks, ks); // W
-          c.strokeRect(-ks*1.1, 0, ks, ks);    // A
-          c.strokeRect(-ks/2, 0, ks, ks);      // S
-          c.strokeRect(ks*0.1, 0, ks, ks);     // D
-          break;
-        }
-        case 'esc_key': {
-          c.strokeRect(-12, -10, 24, 20);
-          c.font = '6px monospace';
-          c.fillStyle = `rgba(255, 255, 255, ${o.opacity * 0.7})`;
-          c.fillText('ESC', -5, 3);
-          break;
-        }
-        case 'code_brackets': {
-          c.font = 'bold 11px monospace';
-          c.fillStyle = `rgba(34, 211, 238, ${o.opacity * 0.8})`;
-          c.fillText('</>', -10, 4);
-          break;
-        }
-        case 'binary': {
-          c.font = '8px monospace';
-          c.fillStyle = `rgba(99, 102, 241, ${o.opacity * 0.75})`;
-          c.fillText(Math.random() > 0.5 ? '101' : '010', -8, 3);
-          break;
-        }
-        case 'shield': {
-          c.beginPath();
-          c.moveTo(0, -11);
-          c.lineTo(10, -7);
-          c.lineTo(10, 2);
-          c.quadraticCurveTo(10, 10, 0, 12);
-          c.quadraticCurveTo(-10, 10, -10, 2);
-          c.lineTo(-10, -7);
-          c.closePath();
-          c.stroke();
-          c.fill();
-          break;
-        }
-        case 'cpu_chip': {
-          c.strokeRect(-11, -11, 22, 22);
-          c.fillStyle = `rgba(34, 211, 238, ${o.opacity * 0.1})`;
-          c.fillRect(-7, -7, 14, 14);
-          c.strokeRect(-7, -7, 14, 14);
-          // Connector pins
-          for (let i = -8; i <= 8; i += 4) {
-            c.strokeRect(i - 1, -14, 2, 3);
-            c.strokeRect(i - 1, 11, 2, 3);
-            c.strokeRect(-14, i - 1, 3, 2);
-            c.strokeRect(11, i - 1, 3, 2);
-          }
-          break;
-        }
-        case 'neural_nodes': {
-          // 3 nodes connected
-          const n1 = { x: -8, y: 6 };
-          const n2 = { x: 8, y: 6 };
-          const n3 = { x: 0, y: -8 };
-          c.beginPath();
-          c.moveTo(n1.x, n1.y);
-          c.lineTo(n2.x, n2.y);
-          c.lineTo(n3.x, n3.y);
-          c.closePath();
-          c.stroke();
-          
-          c.beginPath();
-          c.arc(n1.x, n1.y, 2, 0, Math.PI * 2);
-          c.arc(n2.x, n2.y, 2, 0, Math.PI * 2);
-          c.arc(n3.x, n3.y, 2, 0, Math.PI * 2);
-          c.fillStyle = 'rgb(34, 211, 238)';
-          c.fill();
-          break;
-        }
-        case 'light_bulb': {
-          c.beginPath();
-          c.arc(0, -4, 8, 0, Math.PI * 2);
-          c.stroke();
-          c.strokeRect(-4, 4, 8, 4);
-          // Filament
-          c.beginPath();
-          c.moveTo(-3, -3);
-          c.lineTo(0, -7);
-          c.lineTo(3, -3);
-          c.stroke();
-          break;
-        }
-      }
-      
-      c.restore();
-    };
-
-    // Draw the faint logo overlay
-    const drawFaintLogo = (c: CanvasRenderingContext2D, opacity: number, progress: number) => {
-      const midX = window.innerWidth / 2;
-      const midY = window.innerHeight / 2;
-      
-      c.save();
-      c.translate(midX, midY);
-      
-      c.shadowColor = 'rgb(34, 211, 238)';
-      c.shadowBlur = 15;
-      
-      c.strokeStyle = `rgba(34, 211, 238, ${opacity})`;
-      c.lineWidth = 1;
-      
-      // Stylized Brain contour lines representing the logo
-      c.beginPath();
-      // Left hemisphere lobe
-      c.arc(-40, 0, 70, Math.PI * 0.5, Math.PI * 1.5);
-      c.bezierCurveTo(-40, -110, 20, -110, 20, -50);
-      c.bezierCurveTo(20, -20, -40, -20, -40, 0);
-      // Right hemisphere lobe
-      c.arc(40, 0, 70, Math.PI * 1.5, Math.PI * 0.5);
-      c.bezierCurveTo(40, 110, -20, 110, -20, 50);
-      c.bezierCurveTo(-20, 20, 40, 20, 40, 0);
-      c.stroke();
-
-      // Interconnecting center helix points (dissolving on transition progress)
-      const count = 12;
-      for (let i = 0; i < count; i++) {
-        const theta = (i / count) * Math.PI * 4 + progress * Math.PI * 2;
-        const helixR = 15 + Math.sin(theta * 0.5) * 5;
-        const hx = Math.cos(theta) * helixR;
-        const hy = (i / count - 0.5) * 90;
-        
-        c.beginPath();
-        c.arc(hx, hy, 1.8, 0, Math.PI * 2);
-        c.fillStyle = `rgba(34, 211, 238, ${opacity * 1.8})`;
-        c.fill();
-
-        // Connect adjacent points
-        if (i < count - 1) {
-          const nextTheta = ((i + 1) / count) * Math.PI * 4 + progress * Math.PI * 2;
-          const nextHelixR = 15 + Math.sin(nextTheta * 0.5) * 5;
-          const nhx = Math.cos(nextTheta) * nextHelixR;
-          const nhy = ((i + 1) / count - 0.5) * 90;
-          c.beginPath();
-          c.moveTo(hx, hy);
-          c.lineTo(nhx, nhy);
-          c.strokeStyle = `rgba(34, 211, 238, ${opacity * 0.5})`;
-          c.stroke();
-        }
-      }
-
-      c.restore();
-    };
-
-    const tick = () => {
-      if (document.hidden) {
-        animationId = requestAnimationFrame(tick);
-        return;
-      }
-
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      ctx.clearRect(0, 0, w, h);
-
-      const now = Date.now();
-      const mouse = mouseRef.current;
-      const hover = hoverRef.current;
-
-      // Determine activity state: disappear if mouse inactive for 2s
-      const isInactive = now - lastMoveTimeRef.current > 2000;
-      
-      // Spawn new objects if moving and below limit (max 10)
-      if (mouse.x > -500 && !isInactive && objects.length < 8 && Math.random() < 0.05) {
-        spawnObject(mouse.x, mouse.y);
-      }
-
-      // Physics, connection drawing, and object render loops
-      for (let i = objects.length - 1; i >= 0; i--) {
-        const o = objects[i];
-        o.age++;
-
-        // Age limit or inactive fade out
-        if (o.age > o.maxAge || isInactive) {
-          o.targetOpacity = 0;
-        }
-
-        // Lerp opacity
-        o.opacity += (o.targetOpacity - o.opacity) * 0.06;
-
-        // Recycle logic
-        if (o.opacity <= 0.01 && o.targetOpacity === 0) {
-          objects.splice(i, 1);
-          continue;
-        }
-
-        // Magnet attraction & repulsion physics
-        const dx = mouse.x - o.x;
-        const dy = mouse.y - o.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist > 130) {
-          // Attract towards cursor
-          const force = 0.0004 * o.depth;
-          o.vx += dx * force;
-          o.vy += dy * force;
-        } else if (dist < 55) {
-          // Repel from cursor
-          const force = 0.008 / o.depth;
-          o.vx -= dx * force;
-          o.vy -= dy * force;
-        }
-
-        // Apply friction
-        o.vx *= 0.94;
-        o.vy *= 0.94;
-
-        o.x += o.vx;
-        o.y += o.vy;
-        o.rotation += o.rotSpeed;
-
-        // Interactive states: extra glow when hovering buttons
-        if (hover.type !== 'none') {
-          // Increase size/glow
-          o.opacity = Math.min(o.opacity * 1.1, 1);
-        }
-
-        // Draw connections between objects that are close
-        for (let j = i + 1; j < objects.length; j++) {
-          const o2 = objects[j];
-          const odx = o.x - o2.x;
-          const ody = o.y - o2.y;
-          const odist = Math.sqrt(odx * odx + ody * ody);
-
-          if (odist < 85) {
-            ctx.beginPath();
-            ctx.moveTo(o.x, o.y);
-            ctx.lineTo(o2.x, o2.y);
-            const lineOpacity = (1 - odist / 85) * 0.08 * o.opacity * o2.opacity;
-            ctx.strokeStyle = `rgba(34, 211, 238, ${lineOpacity})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
-        }
-
-        // Draw vector object
-        drawObject(ctx, o);
-      }
-
-      // Draw active hover interactive overlays
-      if (hover.type === 'portfolio' && mouse.x > -500) {
-        // Draw tiny floating browser frame lines near cursor
-        ctx.strokeStyle = `rgba(34, 211, 238, 0.15)`;
-        ctx.strokeRect(mouse.x + 20, mouse.y - 30, 45, 30);
-        ctx.beginPath();
-        ctx.moveTo(mouse.x + 20, mouse.y - 23);
-        ctx.lineTo(mouse.x + 65, mouse.y - 23);
-        ctx.stroke();
-      } else if (hover.type === 'service' && mouse.x > -500) {
-        // Draw circuit connections lines reaching towards the hovered element boundary coordinates
-        ctx.beginPath();
-        ctx.moveTo(mouse.x, mouse.y);
-        ctx.lineTo(hover.x + hover.width / 2, hover.y + hover.height / 2);
-        ctx.strokeStyle = `rgba(34, 211, 238, 0.08)`;
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      } else if (hover.type === 'button' && mouse.x > -500) {
-        // Spark loops
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, 25, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(34, 211, 238, 0.05)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-
-      // Handle the faint wireframe logo overlay timer loop (every 18 seconds)
-      const logoTimer = logoTimerRef.current;
-      const logoElapsed = now - logoTimer.lastTrigger;
-      
-      if (logoTimer.state === 'idle' && logoElapsed > 18000) {
-        logoTimer.state = 'fadein';
-        logoTimer.lastTrigger = now;
-      }
-
-      if (logoTimer.state !== 'idle') {
-        const duration = 2000; // 2 seconds total logo duration
-        const cycleProgress = now - logoTimer.lastTrigger;
-        
-        logoTimer.progress = cycleProgress / duration;
-        
-        let logoOpacity = 0;
-        if (logoTimer.progress < 0.25) {
-          // fade in
-          logoOpacity = (logoTimer.progress / 0.25) * 0.04;
-        } else if (logoTimer.progress < 0.75) {
-          // sustain
-          logoOpacity = 0.04;
-        } else if (logoTimer.progress < 1.0) {
-          // dissolve fade out
-          logoOpacity = (1 - (logoTimer.progress - 0.75) / 0.25) * 0.04;
-        } else {
-          // loop completed
-          logoTimer.state = 'idle';
-          logoTimer.lastTrigger = now;
-        }
-
-        if (logoOpacity > 0.001) {
-          drawFaintLogo(ctx, logoOpacity, logoTimer.progress);
-        }
-      }
-
-      animationId = requestAnimationFrame(tick);
-    };
-
-    tick();
-
-    return () => {
+      isLoopRunning = false;
       cancelAnimationFrame(animationId);
       window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseover', handleMouseOver);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -482,4 +470,20 @@ export default function CursorExperienceCanvas() {
       <canvas ref={canvasRef} className="block w-full h-full" />
     </div>
   );
+}
+
+export default function CursorExperienceCanvas() {
+  const [isDisabled, setIsDisabled] = useState(true);
+
+  useEffect(() => {
+    const checkDevice = () => {
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobile = window.matchMedia('(max-width: 768px)').matches;
+      setIsDisabled(isTouch || isMobile);
+    };
+    checkDevice();
+  }, []);
+
+  if (isDisabled) return null;
+  return <CursorExperienceCanvasContent />;
 }

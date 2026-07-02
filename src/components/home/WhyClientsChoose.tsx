@@ -69,14 +69,14 @@ export default function WhyClientsChoose() {
       id="why-choose"
       className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
-      {/* Ambient background glows */}
-      <div className="absolute top-[30%] left-[-15%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,transparent_70%)] filter blur-[120px] pointer-events-none -z-10 animate-pulse-glow" />
-      <div className="absolute bottom-[20%] right-[-15%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.015)_0%,transparent_70%)] filter blur-[120px] pointer-events-none -z-10" />
+      {/* Ambient background glows — static opacity */}
+      <div className="absolute top-[30%] left-[-15%] w-[380px] h-[380px] rounded-full pointer-events-none -z-10 opacity-55" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.04) 0%, rgba(34,211,238,0.01) 40%, transparent 70%)' }} />
+      <div className="absolute bottom-[20%] right-[-15%] w-[380px] h-[380px] rounded-full pointer-events-none -z-10 opacity-45" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)' }} />
 
       {/* Floating particles background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-[20%] right-[25%] w-2 h-2 rounded-full bg-cyan-400/20 filter blur-xs animate-float" style={{ animationDuration: '9s', animationDelay: '1s' }} />
-        <div className="absolute bottom-[30%] left-[20%] w-3 h-3 rounded-full bg-indigo-500/10 filter blur-[1px] animate-float" style={{ animationDuration: '11s', animationDelay: '3s' }} />
+        <div className="absolute top-[20%] right-[25%] w-2 h-2 rounded-full bg-cyan-400/18 animate-float" style={{ animationDuration: '9s', animationDelay: '1s' }} />
+        <div className="absolute bottom-[30%] left-[20%] w-3 h-3 rounded-full bg-indigo-500/10 animate-float" style={{ animationDuration: '11s', animationDelay: '3s' }} />
       </div>
 
       <div className="container relative z-10 max-w-[1140px] mx-auto px-6">
@@ -132,7 +132,6 @@ export default function WhyClientsChoose() {
               }}
               transition={{ duration: 0.4, ease: EASE }}
               className="group p-7 rounded-2xl bg-neutral-950/45 backdrop-blur-xl border border-white/8 flex flex-col items-start relative overflow-hidden transition-all duration-300 text-left"
-              style={{ willChange: 'transform' }}
             >
               {/* Top accent glow line */}
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/0 to-transparent group-hover:via-cyan-400/35 transition-all duration-500" />

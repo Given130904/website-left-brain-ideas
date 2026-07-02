@@ -5,23 +5,25 @@ import CodeTerminal from '../ui/CodeTerminal';
 import Button from '../ui/Button';
 import { motion } from 'framer-motion';
 
+const CHECKLIST_KEYS = ['code', 'speed', 'data', 'scale', 'longterm'];
+
+const getInitialLines = (lng: string) => {
+  return lng === 'id' 
+    ? [
+        'leftbrain@ideas:~# ./cek-keamanan-website.sh',
+        'Menyiapkan parameter pemeriksaan website...',
+        'Klik tombol di atas untuk mulai memindai kualitas website.'
+      ]
+    : [
+        'leftbrain@ideas:~# ./scan-storefront.sh',
+        'Initializing storefront integrity scan parameters...',
+        'Click the button above to begin auditing the system.'
+      ];
+};
+
 export default function SecuritySection() {
   const { t, i18n } = useTranslation();
   
-  const getInitialLines = (lng: string) => {
-    return lng === 'id' 
-      ? [
-          'leftbrain@ideas:~# ./cek-keamanan-website.sh',
-          'Menyiapkan parameter pemeriksaan website...',
-          'Klik tombol di atas untuk mulai memindai kualitas website.'
-        ]
-      : [
-          'leftbrain@ideas:~# ./scan-storefront.sh',
-          'Initializing storefront integrity scan parameters...',
-          'Click the button above to begin auditing the system.'
-        ];
-  };
-
   const [terminalLines, setTerminalLines] = useState<string[]>(() => getInitialLines(i18n.language));
   const [isAuditing, setIsAuditing] = useState(false);
 
@@ -97,15 +99,13 @@ export default function SecuritySection() {
     });
   };
 
-  const checklistKeys = ['code', 'speed', 'data', 'scale', 'longterm'];
-
   return (
     <section 
       id="security" 
       className="py-24 md:py-32 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
       {/* Background radial highlight */}
-      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.012)_0%,transparent_70%)] filter blur-[85px] pointer-events-none -z-10" />
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[450px] h-[450px] rounded-full bg-[radial-gradient(circle,rgba(16,185,129,0.012)_0%,rgba(16,185,129,0.003)_40%,transparent_70%)] pointer-events-none -z-10" />
 
       <div className="container relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -127,7 +127,7 @@ export default function SecuritySection() {
 
             {/* Checklist */}
             <div className="flex flex-col gap-3.5 w-full max-w-[500px]">
-              {checklistKeys.map((key, index) => (
+              {CHECKLIST_KEYS.map((key, index) => (
                 <motion.div 
                   key={key}
                   initial={{ opacity: 0, x: -20 }}

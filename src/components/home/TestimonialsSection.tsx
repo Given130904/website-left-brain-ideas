@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { ArrowLeft, ArrowRight, Quote } from 'lucide-react';
@@ -41,10 +41,10 @@ export default function TestimonialsSection() {
   const isInView = useInView(sectionRef, { margin: '-50px' });
 
   // Consolidate both left and right lists from localization into a single array
-  const testimonials = [
+  const testimonials = useMemo(() => [
     ...(((t('testimonials.left', { returnObjects: true }) as any[]) || []).map(item => ({ ...item, rating: 5 }))),
     ...(((t('testimonials.right', { returnObjects: true }) as any[]) || []).map(item => ({ ...item, rating: 5 })))
-  ] as Testimonial[];
+  ], [t]) as Testimonial[];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0); // -1 for left, 1 for right
@@ -89,14 +89,14 @@ export default function TestimonialsSection() {
       ref={sectionRef}
       className="py-28 md:py-36 relative overflow-hidden bg-[#050505] border-t border-white/8"
     >
-      {/* Background glow highlights */}
-      <div className="absolute top-[30%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.02)_0%,transparent_70%)] filter blur-[110px] pointer-events-none -z-10 animate-pulse-glow" />
-      <div className="absolute bottom-[30%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(59,130,246,0.015)_0%,transparent_70%)] filter blur-[110px] pointer-events-none -z-10" />
+      {/* Background glow highlights — static opacity */}
+      <div className="absolute top-[30%] left-[-10%] w-[380px] h-[380px] rounded-full pointer-events-none -z-10 opacity-55" style={{ background: 'radial-gradient(circle, rgba(34,211,238,0.04) 0%, rgba(34,211,238,0.01) 40%, transparent 70%)' }} />
+      <div className="absolute bottom-[30%] right-[-10%] w-[380px] h-[380px] rounded-full pointer-events-none -z-10 opacity-45" style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.03) 0%, transparent 70%)' }} />
 
-      {/* Floating particles */}
+      {/* Floating particles (viewport gated) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className={`absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-cyan-400/20 filter blur-xs ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '7s' }} />
-        <div className={`absolute bottom-[20%] right-[15%] w-3 h-3 rounded-full bg-blue-400/10 filter blur-[1px] ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '10s', animationDelay: '2s' }} />
+        <div className={`absolute top-[20%] left-[15%] w-2 h-2 rounded-full bg-cyan-400/18 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '7s' }} />
+        <div className={`absolute bottom-[20%] right-[15%] w-3 h-3 rounded-full bg-blue-400/10 ${isInView ? 'animate-float' : ''}`} style={{ animationDuration: '10s', animationDelay: '2s' }} />
       </div>
 
       <div className="container relative z-10 max-w-[800px] mx-auto px-6">
